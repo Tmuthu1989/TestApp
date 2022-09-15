@@ -15,10 +15,8 @@ Things you may want to cover:
 
 * in terminal or command prompt follow these commands
 
-`
-	rails db:create
-	rails db:migrate
-	rails db:seed
-`
+`rails db:create`
+`rails db:migrate`
+`rails db:seed`
 
 * to start server `rails s`
