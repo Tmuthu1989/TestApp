@@ -15,6 +15,7 @@ Things you may want to cover:
 
 * in terminal or command prompt follow these commands
 
+`bundle install`
 `rails db:create`
 `rails db:migrate`
 `rails db:seed`
