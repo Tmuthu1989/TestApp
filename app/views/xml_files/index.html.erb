@@ -1,0 +1,34 @@
+<%page_name "XML Files"%>
+
+<div class="card card-info">
+  <div class="card-body">
+    <div class="row">
+      <div class="col-12">
+        <%= link_to read_xml_files_xml_files_path, class: "btn btn-sm btn-primary  mb-3 float-right" do %>
+          <em class="fas fa-sync"></em> Sync XML Files
+        <%end%>
+        <div id="xml_files">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>File Name</th>
+                <th>File Path</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <%if @xml_files.present?%>
+                <% @xml_files.each do |xml_file| %>
+                  <%= render xml_file %>
+                <% end %>
+              <%else%>
+                <td colspan="4" class="text-danger text-center">No XML Files found!</td>
+              <%end%>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

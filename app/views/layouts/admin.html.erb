@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+   <meta name="description" content="Bootstrap Admin App">
+   <meta name="keywords" content="app, responsive, jquery, bootstrap, dashboard, admin">
+   <link rel="icon" type="image/x-icon" href="/favicon.ico">
+   <title>Read XML</title><!-- =============== VENDOR STYLES ===============-->
+   <!-- FONT AWESOME-->
+   <link rel="stylesheet" href="/templates/admin/vendor/@fortawesome/fontawesome-free/css/brands.css">
+   <link rel="stylesheet" href="/templates/admin/vendor/@fortawesome/fontawesome-free/css/regular.css">
+   <link rel="stylesheet" href="/templates/admin/vendor/@fortawesome/fontawesome-free/css/solid.css">
+   <link rel="stylesheet" href="/templates/admin/vendor/@fortawesome/fontawesome-free/css/fontawesome.css"><!-- SIMPLE LINE ICONS-->
+   <link rel="stylesheet" href="/templates/admin/vendor/simple-line-icons/css/simple-line-icons.css"><!-- ANIMATE.CSS-->
+   <link rel="stylesheet" href="/templates/admin/vendor/animate.css/animate.css"><!-- WHIRL (spinners)-->
+   <link rel="stylesheet" href="/templates/admin/vendor/whirl/dist/whirl.css"><!-- =============== PAGE VENDOR STYLES ===============-->
+   <!-- =============== BOOTSTRAP STYLES ===============-->
+   <link rel="stylesheet" href="/templates/admin/css/bootstrap.css" id="bscss"><!-- =============== APP STYLES ===============-->
+   <link rel="stylesheet" href="/templates/admin/css/app.css" id="maincss">
+   <%= csrf_meta_tags %>
+   <%= csp_meta_tag %>
+</head>
+
+<body>
+   <div class="wrapper">
+      <%= render 'layouts/partials/header'%>
+      <%= render 'layouts/partials/sidebar'%>
+      <%= render 'layouts/partials/right_sidebar'%>
+      <!-- Main section-->
+      <section class="section-container">
+         <div class="content-wrapper">
+           <div class="content-heading">
+              <div><%= yield(:page_name) %></div>
+           </div>
+           <div class="row">
+               <div class="col-12">
+                  <%if notice.present?%><p class="alert alert-success"><%= notice %></p><%end%>
+                  <%if alert.present?%><p class="alert alert-danger"><%= alert %></p><%end%>                  
+               </div>
+               <div class="col-lg-12">
+                  <%= yield%>
+               </div>
+           </div>
+        </div>
+      </section><!-- Page footer-->
+      <footer class="footer-container"><span>&copy; <%= Date.today.year%> - Load XML</span></footer>
+   </div><!-- =============== VENDOR SCRIPTS ===============-->
+   <!-- MODERNIZR-->
+   <script src="/templates/admin/vendor/modernizr/modernizr.custom.js"></script><!-- STORAGE API-->
+   <script src="/templates/admin/vendor/js-storage/js.storage.js"></script><!-- SCREENFULL-->
+   <script src="/templates/admin/vendor/screenfull/dist/screenfull.js"></script><!-- i18next-->
+   <script src="/templates/admin/vendor/i18next/i18next.js"></script>
+   <script src="/templates/admin/vendor/i18next-xhr-backend/i18nextXHRBackend.js"></script><!-- =============== PAGE VENDOR SCRIPTS ===============-->
+   <!-- =============== APP SCRIPTS ===============-->
+   <script src="/templates/admin/js/app.js"></script>
+   <%= javascript_importmap_tags %>
+
+</body>
+
+</html>

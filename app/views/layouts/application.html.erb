@@ -12,8 +12,11 @@
 
   <body>
     <div class="container">
-      <%= yield %>
-      
+      <div class="col-12">
+        <%if notice.present?%><p class="alert alert-success"><%= notice %></p><%end%>
+        <%if alert.present?%><p class="alert alert-danger"><%= alert %></p><%end%>                  
+     </div>
+      <%= yield %>      
     </div>
   </body>
 </html>

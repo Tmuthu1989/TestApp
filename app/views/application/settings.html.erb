@@ -1,0 +1,29 @@
+<%page_name "Settings"%>
+<div class="card card-info">
+	<div class="card-body">
+		<%= form_for(@setting, url: settings_path, method: :post) do |f|%>
+			<div class="row">
+				<div class="col-12 col-sm-6 col-md-4 col-lg-3">
+					<div class="form-group">
+						<label for="">Application Name <i class="fa fa-asterisk required"></i></label>
+						<%= f.text_field :app_name, class: "form-control", required: true%>
+					</div>
+				</div>
+
+				<div class="col-12 col-sm-6 col-md-4 col-lg-3">
+					<div class="form-group">
+						<label for="">XML Files Path <i class="fa fa-asterisk required"></i><small>(Eg.: /home/Desktop/)</small></label>
+						<%= f.text_field :xml_files_path, class: "form-control", required: true%>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-12 col-sm-6 col-md-4 col-lg-3">
+					<div class="form-group">
+						<%= f.submit "Save", class: "btn btn-success"%>
+					</div>
+				</div>
+			</div>
+		<%end%>
+	</div>
+</div>

@@ -1,0 +1,30 @@
+<!-- sidebar-->
+<aside class="aside-container">
+   <!-- START Sidebar (left)-->
+   <div class="aside-inner">
+      <nav class="sidebar" data-sidebar-anyclick-close="">
+         <!-- START sidebar nav-->
+         <ul class="sidebar-nav">
+            <!-- START user info-->
+            <li class="has-user-block">
+               <div class="collapse" id="user-block">
+                  <div class="item user-block">
+                     <!-- User picture-->
+                     <div class="user-block-picture">
+                        <div class="user-block-status"><img class="img-thumbnail rounded-circle" src="/templates/admin/img/user/02.jpg" alt="Avatar" width="60" height="60">
+                           <div class="circle bg-success circle-lg"></div>
+                        </div>
+                     </div><!-- Name and Job-->
+                     <div class="user-block-info"><span class="user-block-name">Hello, Mike</span><span class="user-block-role">Designer</span></div>
+                  </div>
+               </div>
+            </li><!-- END user info-->
+            <!-- Iterates over all sidebar items-->
+            <li class="nav-heading "><span data-localize="sidebar.heading.HEADER">Menu Navigation</span></li>
+            <li class="<%= check_active('/')%>"><a href="/" title="Posts"><em class="fas fa-file"></em>Posts</a></li>
+            <li class="<%= check_active(settings_path)%>"><a href="<%= settings_path %>" title="Settings"><em class="fas fa-cog"></em>Settings</a></li>
+            <li class="<%= check_active(xml_files_path)%>"><a href="<%= xml_files_path %>" title="XML Files"><em class="fas fa-file"></em>XML Files</a></li>
+         </ul><!-- END sidebar nav-->
+      </nav>
+   </div><!-- END Sidebar (left)-->
+</aside>
