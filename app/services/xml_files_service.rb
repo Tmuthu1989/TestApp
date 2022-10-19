@@ -13,9 +13,9 @@ class XmlFilesService < BaseService
 				unless existing_files.include?(file_name)
 					begin
 						file_content = File.read(file_path)
-						XmlFile.create(file_name: file_name, file_path: file_path, file_content: file_content, date: Date.today.strftime("%d-%m-%Y"), status: XmlFile::STATUS[:pending])
+						XmlFile.create(file_name: file_name, file_path: file_path, file_content: file_content, date: Date.today.strftime("%d-%m-%Y"), status: AppConstants::FILE_STATUS[:pending])
 					rescue Exception => e
-						XmlFile.create(file_name: file_name, file_path: file_path, file_error: e.message, date: Date.today.strftime("%d-%m-%Y"), status: XmlFile::STATUS[:failed])
+						XmlFile.create(file_name: file_name, file_path: file_path, file_error: e.message, date: Date.today.strftime("%d-%m-%Y"), status: AppConstants::FILE_STATUS[:failed])
 					end
 				end
 			end
@@ -28,6 +28,10 @@ class XmlFilesService < BaseService
 
 	def show
 		xml_file
+	end
+
+	def destroy
+		xml_file.destroy
 	end
 
 	def get_xml_file

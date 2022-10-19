@@ -22,6 +22,9 @@
       <ul class="navbar-nav flex-row">
          <!-- Search icon-->
          <li class="nav-item">
+            <div class="alert alert-success m-1" id="file_processing_alert">asdf</div>
+         </li>
+         <li class="nav-item">
             <%= link_to destroy_user_session_path, class: "nav-link", method: :delete do %>
                <em class="fas fa-sign-out-alt"></em> Logout
             <%end%>

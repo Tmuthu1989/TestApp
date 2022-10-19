@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  xml_file: one
+  part_type: MyString
+  part_json: 
+  part_xml: MyText
+  status: MyString
+
+two:
+  xml_file: two
+  part_type: MyString
+  part_json: 
+  part_xml: MyText
+  status: MyString

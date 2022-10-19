@@ -10,11 +10,25 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_10_18_115347) do
+ActiveRecord::Schema[7.0].define(version: 2022_10_19_095059) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
   enable_extension "uuid-ossp"
+
+  create_table "parts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "xml_file_id", null: false
+    t.string "part_number"
+    t.string "part_name"
+    t.string "part_type"
+    t.jsonb "part_json", default: "{}"
+    t.text "part_xml"
+    t.text "error"
+    t.string "status", default: "Pending"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["xml_file_id"], name: "index_parts_on_xml_file_id"
+  end
 
   create_table "posts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "title"
@@ -53,4 +67,5 @@ ActiveRecord::Schema[7.0].define(version: 2022_10_18_115347) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "parts", "xml_files"
 end

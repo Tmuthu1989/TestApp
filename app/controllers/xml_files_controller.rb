@@ -14,6 +14,11 @@ class XmlFilesController < ApplicationController
     redirect_to xml_files_path, notice: "Files Completed"
   end
 
+  def destroy
+    @service.destroy
+    redirect_to xml_files_path, notice: "File deleted"
+  end
+
   private
     def init_service!
       @service = XmlFilesService.new(request, params, current_user)

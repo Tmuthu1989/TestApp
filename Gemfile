@@ -79,3 +79,6 @@ gem 'bootstrap', '~> 5.1.3'
 gem 'devise-bootstrap-views'
 gem 'faker'
 gem 'json'
+gem 'sidekiq'
+
+gem "jquery-rails"
