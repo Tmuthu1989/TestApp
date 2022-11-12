@@ -7,7 +7,7 @@ module ApplicationHelper
 	  content_for :page_name, page_name.to_s
 	end
 
-	def check_active(path)
-		request.path === path ? 'active' : ''
+	def check_active(path, is_root=false)
+		(request.path === path || request.path.include?("/#{path}") || request.path.include?("#{path}/")) || (is_root && request.path === "/") ? 'active' : ''
 	end
 end

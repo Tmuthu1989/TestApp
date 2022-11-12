@@ -35,6 +35,6 @@ class XmlFilesService < BaseService
 	end
 
 	def get_xml_file
-		XmlFile.find_by(id: params[:id])
+		XmlFile.find_by(id: params[:id] || params[:xml_file_id])
 	end
 end

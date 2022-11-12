@@ -12,8 +12,57 @@
 
 				<div class="col-12 col-sm-6 col-md-4 col-lg-3">
 					<div class="form-group">
-						<label for="">XML Files Path <i class="fa fa-asterisk required"></i><small>(Eg.: /home/Desktop/)</small></label>
+						<label for="">XML Files Path <small>(Eg.: /home/Desktop/)</small><i class="fa fa-asterisk required"></i></label>
 						<%= f.text_field :xml_files_path, class: "form-control", required: true%>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-12">
+					<h4>API Config:</h4>
+					<div class="card" style="border: 1px solid #ddd;">
+						<div class="card-body">
+							<div class="row">
+								<%= f.fields_for :api_config do |field|%>
+									<div class="col-12 col-md-4 col-lg-3">
+										<div class="form-group">
+											<label for="">Base URL (<small>Ex: https://www.example.com</small>) <i class="fas fa-asterisk required"></i></label>
+											<%= field.url_field :base_url, value: @setting.api_config["base_url"], class: "form-control"%>
+										</div>
+									</div>
+									<div class="col-12 col-md-4 col-lg-3">
+										<div class="form-group">
+											<label for="">Access Token Path (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+											<%= field.text_field :auth, value: @setting.api_config["auth"], class: "form-control"%>
+										</div>
+									</div>
+									<div class="col-12 col-md-4 col-lg-3">
+										<div class="form-group">
+											<label for="">Product List Path (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+											<%= field.text_field :product_list, value: @setting.api_config["product_list"], class: "form-control"%>
+										</div>
+									</div>
+									<div class="col-12 col-md-4 col-lg-3">
+										<div class="form-group">
+											<label for="">Product Creation Path(<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+											<%= field.text_field :product_creation, value: @setting.api_config["product_creation"], class: "form-control"%>
+										</div>
+									</div>
+									<div class="col-12 col-md-4 col-lg-3">
+										<div class="form-group">
+											<label for="">Product Update Path (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+											<%= field.text_field :product_update, value: @setting.api_config["product_update"], class: "form-control"%>
+										</div>
+									</div>
+									<div class="col-12 col-md-4 col-lg-3">
+										<div class="form-group">
+											<label for="">Product Delete (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+											<%= field.text_field :product_delete, value: @setting.api_config["product_delete"], class: "form-control"%>
+										</div>
+									</div>
+								<%end%>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>

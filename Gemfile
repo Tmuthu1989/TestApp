@@ -9,7 +9,8 @@ gem "rails", "~> 7.0.4"
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
 gem "sprockets-rails"
 gem "pg"
-gem 'mini_racer', platforms: :ruby
+gem 'libv8', "~> 3.16.14.3"
+gem 'mini_racer'
 
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", "~> 5.0"
@@ -82,3 +83,5 @@ gem 'json'
 gem 'sidekiq'
 
 gem "jquery-rails"
+gem "kaminari"
+gem 'bootstrap4-kaminari-views'

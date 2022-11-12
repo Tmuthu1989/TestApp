@@ -24,6 +24,6 @@ class BaseService
 
   private
     def setting_params
-      params.require(:setting).permit(:app_name, :xml_files_path)
+      params.require(:setting).permit(:app_name, :xml_files_path, {api_config: [:base_url, :auth, :product_creation, :product_update, :product_list, :product_delete]} )
     end
 end
