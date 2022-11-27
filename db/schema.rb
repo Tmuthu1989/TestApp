@@ -10,11 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_11_12_082149) do
+ActiveRecord::Schema[7.0].define(version: 2022_11_27_033627) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
   enable_extension "uuid-ossp"
+
+  create_table "http_requests", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "xml_file_id"
+    t.string "req_url"
+    t.jsonb "req_body", default: {}
+    t.jsonb "res_body", default: {}
+    t.jsonb "error", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "parts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "xml_file_id", null: false
@@ -27,6 +37,18 @@ ActiveRecord::Schema[7.0].define(version: 2022_11_12_082149) do
     t.string "status", default: "Pending"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "odoo_body", default: {}
+    t.string "odoo_part_number"
+    t.string "created_by"
+    t.jsonb "transaction_obj", default: {}
+    t.string "processed_by"
+    t.index ["odoo_part_number", "part_name", "part_number"], name: "index_parts_on_odoo_part_number_and_part_name_and_part_number"
+    t.index ["odoo_part_number", "part_name"], name: "index_parts_on_odoo_part_number_and_part_name"
+    t.index ["odoo_part_number", "part_number"], name: "index_parts_on_odoo_part_number_and_part_number"
+    t.index ["odoo_part_number"], name: "index_parts_on_odoo_part_number"
+    t.index ["part_name", "part_number"], name: "index_parts_on_part_name_and_part_number"
+    t.index ["part_name"], name: "index_parts_on_part_name"
+    t.index ["part_number"], name: "index_parts_on_part_number"
     t.index ["xml_file_id"], name: "index_parts_on_xml_file_id"
   end
 
@@ -44,6 +66,8 @@ ActiveRecord::Schema[7.0].define(version: 2022_11_12_082149) do
     t.datetime "updated_at", null: false
     t.json "api_config", default: {}
     t.text "current_api_key"
+    t.string "access_token"
+    t.string "cookie"
   end
 
   create_table "subscriptions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

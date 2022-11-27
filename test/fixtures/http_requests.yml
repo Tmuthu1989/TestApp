@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  xml_file_id: MyString
+  req_body: 
+  res_body: 
+  error: MyText
+
+two:
+  xml_file_id: MyString
+  req_body: 
+  res_body: 
+  error: MyText

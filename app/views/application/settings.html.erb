@@ -38,6 +38,24 @@
 									</div>
 									<div class="col-12 col-md-4 col-lg-3">
 										<div class="form-group">
+											<label for="">Login <i class="fas fa-asterisk required"></i></label>
+											<%= field.text_field :auth_login, value: @setting.api_config["auth_login"], class: "form-control"%>
+										</div>
+									</div>
+									<div class="col-12 col-md-4 col-lg-3">
+										<div class="form-group">
+											<label for="">Password <i class="fas fa-asterisk required"></i></label>
+											<%= field.text_field :auth_password, value: @setting.api_config["auth_password"], class: "form-control"%>
+										</div>
+									</div>
+									<div class="col-12 col-md-4 col-lg-3">
+										<div class="form-group">
+											<label for="">DB <i class="fas fa-asterisk required"></i></label>
+											<%= field.text_field :auth_db, value: @setting.api_config["auth_db"], class: "form-control"%>
+										</div>
+									</div>
+									<div class="col-12 col-md-4 col-lg-3">
+										<div class="form-group">
 											<label for="">Product List Path (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
 											<%= field.text_field :product_list, value: @setting.api_config["product_list"], class: "form-control"%>
 										</div>
