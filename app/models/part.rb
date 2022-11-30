@@ -1,6 +1,31 @@
 class Part < ApplicationRecord
   belongs_to :xml_file
   before_save :set_odo_body
+  scope :inwork, -> {where(state: "INWORK")}
+  scope :pending_parts, -> {where.not(status: AppConstants::FILE_STATUS[:success])}
+  scope :success_parts, -> {where(status: AppConstants::FILE_STATUS[:success])}
+  scope :added_parts, -> {where(part_type: "AddedParts")}
+  scope :added_parts, -> {where(part_type: "AddedParts")}
+  scope :changed_parts, -> {where(part_type: "ChangedParts")}
+  scope :unchanged_parts, -> {where(part_type: "UnchangedParts")}
+  scope :deleleted_parts, -> {where(part_type: "DeletedParts")}
+
+  def self.load_parts(xml_file)
+    json_obj = xml_file.json_obj
+    if json_obj
+      json_content = json_obj["COLLECTION"]
+      transaction_obj = json_content["Release"]["Transaction"]
+      ["AddedParts", "ChangedParts", "UnchangedParts", "DeletedParts"].each do |part_type|
+        if json_content[part_type].present? && json_content[part_type]["Part"].present?
+          parts = json_content[part_type]["Part"]
+          parts = [parts] if parts.class.to_s != "Array"
+          parts.each do |part|
+            xml_file.parts.create(part_name: part["Name"], part_number: part["Number"], part_type: part_type, part_json: part, part_xml: part.to_xml(root: :Part), created_by: transaction_obj["CreatedBy"], transaction_obj: transaction_obj, state: part["State"])
+          end
+        end
+      end
+    end
+  end
 
   def set_odo_body
     part = self.part_json.to_obj
@@ -59,29 +84,29 @@ class Part < ApplicationRecord
 
   def self.process_added_parts(parts, part_types=["AddedParts"], processed_by="Create Products")
     response = @odoo_service.create_products(parts)
-    Part.where(odoo_part_number: parts.map{|part| part["part"]}, part_type: part_types).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: processed_by)
+    Part.where(odoo_part_number: parts.map{|part| part["part"]}, part_type: part_types).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: processed_by) if response.present?
   end
 
   def self.process_other_parts(parts)
     parts_to_be_updated = []
     added_parts = []
+    existing_products = @odoo_service.get_products(parts.map{|part| part["part"]})
     parts.each do |part|
-      existing_products = @odoo_service.get_products({part: [part["part"]]})
-      if existing_products.present?
+      if existing_products.include?(part["part"])
         parts_to_be_updated << part
       else
         added_parts << part
       end
     end
-    process_added_parts(added_parts, ["ChangedParts", "UnchangedParts"], "Update Products") if added_parts.present?
+    process_added_parts(added_parts, ["ChangedParts", "UnchangedParts"], "Created products by Update Products") if added_parts.present?
     if parts_to_be_updated.present?
-      @odoo_service.update_products(parts_to_be_updated)
-      Part.where(odoo_part_number: parts_to_be_updated.map{|part| part["part"]}, part_type: ["ChangedParts", "UnchangedParts"]).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "Update Products")
+      response = @odoo_service.update_products(parts_to_be_updated)
+      Part.where(odoo_part_number: parts_to_be_updated.map{|part| part["part"]}, part_type: ["ChangedParts", "UnchangedParts"]).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "Update Products") if response.present?
     end
   end
 
   def self.process_deleted_parts(parts)
-    @odoo_service.delete_products(parts)
-    Part.where(odoo_part_number: parts.map{|part| part["part"]}, part_type: "DeletedParts").update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "Delete Products")
+    response = @odoo_service.delete_products(parts)
+    Part.where(odoo_part_number: parts.map{|part| part["part"]}, part_type: "DeletedParts").update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "Delete Products") if response.present?
   end
 end

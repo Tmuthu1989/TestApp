@@ -10,11 +10,43 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_11_27_033627) do
+ActiveRecord::Schema[7.0].define(version: 2022_11_30_090719) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
   enable_extension "uuid-ossp"
+
+  create_table "bom_components", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "xml_file_id"
+    t.string "bom_header_id"
+    t.string "bom_component_type"
+    t.string "processed_by"
+    t.string "part_number"
+    t.string "part_state"
+    t.string "assembly_part_number"
+    t.string "odoo_part_number"
+    t.float "quantity"
+    t.string "unit"
+    t.string "status", default: "Pending"
+    t.jsonb "json_obj", default: {}
+    t.text "xml_content"
+    t.jsonb "odoo_body", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "bom_headers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "xml_file_id"
+    t.string "bom_type"
+    t.string "processed_by"
+    t.string "number"
+    t.string "odoo_part_number"
+    t.string "status", default: "Pending"
+    t.jsonb "json_obj", default: {}
+    t.text "xml_content"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "http_requests", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "xml_file_id"
@@ -42,6 +74,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_11_27_033627) do
     t.string "created_by"
     t.jsonb "transaction_obj", default: {}
     t.string "processed_by"
+    t.string "state"
     t.index ["odoo_part_number", "part_name", "part_number"], name: "index_parts_on_odoo_part_number_and_part_name_and_part_number"
     t.index ["odoo_part_number", "part_name"], name: "index_parts_on_odoo_part_number_and_part_name"
     t.index ["odoo_part_number", "part_number"], name: "index_parts_on_odoo_part_number_and_part_number"
@@ -101,6 +134,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_11_27_033627) do
     t.string "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "json_obj", default: {}
   end
 
   add_foreign_key "parts", "xml_files"

@@ -56,7 +56,7 @@
 									</div>
 									<div class="col-12 col-md-4 col-lg-3">
 										<div class="form-group">
-											<label for="">Product List Path (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+											<label for="">Product Search Path (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
 											<%= field.text_field :product_list, value: @setting.api_config["product_list"], class: "form-control"%>
 										</div>
 									</div>
@@ -76,6 +76,30 @@
 										<div class="form-group">
 											<label for="">Product Delete (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
 											<%= field.text_field :product_delete, value: @setting.api_config["product_delete"], class: "form-control"%>
+										</div>
+									</div>
+									<div class="col-12 col-md-4 col-lg-3">
+										<div class="form-group">
+											<label for="">BOM Search Path (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+											<%= field.text_field :bom_search, value: @setting.api_config["bom_search"], class: "form-control"%>
+										</div>
+									</div>
+									<div class="col-12 col-md-4 col-lg-3">
+										<div class="form-group">
+											<label for="">BOM Creation Path(<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+											<%= field.text_field :bom_create, value: @setting.api_config["bom_create"], class: "form-control"%>
+										</div>
+									</div>
+									<div class="col-12 col-md-4 col-lg-3">
+										<div class="form-group">
+											<label for="">BOM Update Path (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+											<%= field.text_field :bom_update, value: @setting.api_config["bom_update"], class: "form-control"%>
+										</div>
+									</div>
+									<div class="col-12 col-md-4 col-lg-3">
+										<div class="form-group">
+											<label for="">BOM Delete (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+											<%= field.text_field :bom_delete, value: @setting.api_config["bom_delete"], class: "form-control"%>
 										</div>
 									</div>
 								<%end%>

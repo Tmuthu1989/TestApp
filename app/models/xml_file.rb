@@ -1,32 +1,42 @@
 class XmlFile < ApplicationRecord
 	has_many :parts, dependent: :destroy
-	after_create :process_file
+	has_many :http_requests, dependent: :destroy
+	has_many :bom_headers, dependent: :destroy
+	has_many :bom_components, dependent: :destroy
+	after_create :update_json_content
 
-	def process_file
-		ProcessXmlFilesJob.perform_later(self.id)
+	scope :pending, -> {where.not(status: AppConstants::FILE_STATUS[:success])}
+	scope :success, -> {where(status: AppConstants::FILE_STATUS[:success])}
+
+	def update_json_content
+		json_content = Hash.from_xml(self.file_content)
+		self.update(json_obj: json_content)
 	end
 
-	def process_xml
-		xml_file = self
-		json_content = Hash.from_xml(xml_file.file_content)
-		if json_content
-			seed_parts(json_content["COLLECTION"])
-			Part.process_parts(self)
-		end
-
-		ActionCable.server.broadcast "process_xml_files:#{User.first.id}", {message: "<b>1/10</b> files are processed!"}
+	def self.process_file(id)
+		ProcessXmlFilesJob.perform_later(id)
 	end
 
-	def seed_parts(json_content)
-		transaction_obj = json_content["Release"]["Transaction"]
-		["AddedParts", "ChangedParts", "UnchangedParts", "DeletedParts"].each do |part_type|
-			if json_content[part_type].present? && json_content[part_type]["Part"].present?
-				parts = json_content[part_type]["Part"]
-				parts = [parts] if parts.class.to_s != "Array"
-				parts.each do |part|
-					self.parts.create(part_name: part["Name"], part_number: part["Number"], part_type: part_type, part_json: part, part_xml: part.to_xml(root: :Part), created_by: transaction_obj["CreatedBy"], transaction_obj: transaction_obj)
-				end
-			end
-		end
+	def self.process_xml(id)
+		xml_file = XmlFile.find_by(id: id)
+		Part.load_parts(xml_file)
+		BomHeader.load_bom_headers(xml_file)
+		BomComponent.load_bom_components(xml_file)
+    Part.process_parts(xml_file)
+    BomHeader.process_boms(xml_file)
+		xml_file.update(status: AppConstants::FILE_STATUS[:success])
+		@success_count += 1
+		ActionCable.server.broadcast "process_xml_files:#{User.first.id}", {message: "<b>#{@success_count}/#{@total_count}</b> files are processed!"}
 	end
+
+	def self.process_pending_xmls
+		xml_files = XmlFile.pending.pluck(:id)
+		@total_count = xml_files.count
+		@success_count = 0
+		ActionCable.server.broadcast "process_xml_files:#{User.first.id}", {message: "Started processing for #{xml_files.count} files!"}
+		xml_files.each do |id|
+			process_file(id)
+		end		
+	end
+
 end

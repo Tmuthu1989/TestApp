@@ -1,0 +1,23 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  bom_header_id: MyString
+  part_number: MyString
+  assembly_part_number: MyString
+  odoo_part_number: MyString
+  json_obj: 
+  xml_content: MyText
+  quantity: 1.5
+  unit: MyString
+  status: MyString
+
+two:
+  bom_header_id: MyString
+  part_number: MyString
+  assembly_part_number: MyString
+  odoo_part_number: MyString
+  json_obj: 
+  xml_content: MyText
+  quantity: 1.5
+  unit: MyString
+  status: MyString
