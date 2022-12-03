@@ -10,15 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_11_30_090719) do
+ActiveRecord::Schema[7.0].define(version: 2022_12_01_100947) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
   enable_extension "uuid-ossp"
 
   create_table "bom_components", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "xml_file_id"
-    t.string "bom_header_id"
+    t.uuid "xml_file_id", null: false
+    t.uuid "bom_header_id", null: false
     t.string "bom_component_type"
     t.string "processed_by"
     t.string "part_number"
@@ -31,12 +31,26 @@ ActiveRecord::Schema[7.0].define(version: 2022_11_30_090719) do
     t.jsonb "json_obj", default: {}
     t.text "xml_content"
     t.jsonb "odoo_body", default: {}
+    t.text "error"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["assembly_part_number"], name: "index_bom_components_on_assembly_part_number"
+    t.index ["bom_component_type", "assembly_part_number", "part_number"], name: "index_type_xml_assembly_part"
+    t.index ["bom_component_type", "assembly_part_number"], name: "index_type_assembly_part"
+    t.index ["bom_component_type", "odoo_part_number", "part_number"], name: "index_type_odoo_part_number"
+    t.index ["bom_component_type", "odoo_part_number"], name: "index_bom_components_on_bom_component_type_and_odoo_part_number"
+    t.index ["bom_component_type", "part_number"], name: "index_bom_components_on_bom_component_type_and_part_number"
+    t.index ["bom_component_type", "xml_file_id", "bom_header_id"], name: "index_type_xml_header"
+    t.index ["bom_component_type", "xml_file_id"], name: "index_bom_components_on_bom_component_type_and_xml_file_id"
+    t.index ["bom_component_type"], name: "index_bom_components_on_bom_component_type"
+    t.index ["bom_header_id"], name: "index_bom_components_on_bom_header_id"
+    t.index ["odoo_part_number"], name: "index_bom_components_on_odoo_part_number"
+    t.index ["part_number"], name: "index_bom_components_on_part_number"
+    t.index ["xml_file_id"], name: "index_bom_components_on_xml_file_id"
   end
 
   create_table "bom_headers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "xml_file_id"
+    t.uuid "xml_file_id", null: false
     t.string "bom_type"
     t.string "processed_by"
     t.string "number"
@@ -44,18 +58,29 @@ ActiveRecord::Schema[7.0].define(version: 2022_11_30_090719) do
     t.string "status", default: "Pending"
     t.jsonb "json_obj", default: {}
     t.text "xml_content"
+    t.text "error"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["bom_type", "number"], name: "index_bom_headers_on_bom_type_and_number"
+    t.index ["bom_type", "odoo_part_number", "number"], name: "index_bom_headers_on_bom_type_and_odoo_part_number_and_number"
+    t.index ["bom_type", "odoo_part_number"], name: "index_bom_headers_on_bom_type_and_odoo_part_number"
+    t.index ["bom_type"], name: "index_bom_headers_on_bom_type"
+    t.index ["number"], name: "index_bom_headers_on_number"
+    t.index ["odoo_part_number"], name: "index_bom_headers_on_odoo_part_number"
+    t.index ["xml_file_id"], name: "index_bom_headers_on_xml_file_id"
   end
 
   create_table "http_requests", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "xml_file_id"
+    t.uuid "xml_file_id", null: false
+    t.string "request_type"
     t.string "req_url"
     t.jsonb "req_body", default: {}
     t.jsonb "res_body", default: {}
     t.jsonb "error", default: {}
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["req_url"], name: "index_http_requests_on_req_url"
+    t.index ["xml_file_id"], name: "index_http_requests_on_xml_file_id"
   end
 
   create_table "parts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -65,7 +90,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_11_30_090719) do
     t.string "part_type"
     t.jsonb "part_json", default: "{}"
     t.text "part_xml"
-    t.text "error"
+    t.jsonb "error"
     t.string "status", default: "Pending"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -101,16 +126,8 @@ ActiveRecord::Schema[7.0].define(version: 2022_11_30_090719) do
     t.text "current_api_key"
     t.string "access_token"
     t.string "cookie"
-  end
-
-  create_table "subscriptions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "user_id"
-    t.string "plan_id"
-    t.datetime "start_date"
-    t.datetime "end_date"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.float "amount"
+    t.boolean "delete_file", default: false
+    t.boolean "rename_document", default: true
   end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -137,5 +154,9 @@ ActiveRecord::Schema[7.0].define(version: 2022_11_30_090719) do
     t.jsonb "json_obj", default: {}
   end
 
+  add_foreign_key "bom_components", "bom_headers"
+  add_foreign_key "bom_components", "xml_files"
+  add_foreign_key "bom_headers", "xml_files"
+  add_foreign_key "http_requests", "xml_files"
   add_foreign_key "parts", "xml_files"
 end

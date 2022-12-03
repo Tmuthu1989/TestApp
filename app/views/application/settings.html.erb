@@ -16,92 +16,184 @@
 						<%= f.text_field :xml_files_path, class: "form-control", required: true%>
 					</div>
 				</div>
+
+				<div class="col-12 col-sm-4 col-md-3 col-lg-2">
+					<div class="form-group">
+						<label for="">Delete XML once Succeeded<i class="fa fa-asterisk required"></i></label>
+						<label class="switch switch-lg">
+               <%= f.check_box :delete_file%>
+               <span></span>
+            </label>
+					</div>
+				</div>
+
+				<div class="col-12 col-sm-4 col-md-3 col-lg-2">
+					<div class="form-group">
+						<label for="">Rename Documents<i class="fa fa-asterisk required"></i></label>
+						<label class="switch switch-lg">
+               <%= f.check_box :rename_document%>
+               <span></span>
+            </label>
+					</div>
+				</div>
 			</div>
 			<div class="row">
 				<div class="col-12">
 					<h4>API Config:</h4>
-					<div class="card" style="border: 1px solid #ddd;">
+					<div class="card shadow card-info">
 						<div class="card-body">
 							<div class="row">
 								<%= f.fields_for :api_config do |field|%>
-									<div class="col-12 col-md-4 col-lg-3">
-										<div class="form-group">
-											<label for="">Base URL (<small>Ex: https://www.example.com</small>) <i class="fas fa-asterisk required"></i></label>
-											<%= field.url_field :base_url, value: @setting.api_config["base_url"], class: "form-control"%>
+									<div class="col-12 no-padding">
+										<div class="row">
+											<div class="col-12 col-md-4 col-lg-3">
+												<div class="form-group">
+													<label for="">Base URL (<small>Ex: https://www.example.com</small>) <i class="fas fa-asterisk required"></i></label>
+													<%= field.url_field :base_url, value: @setting.api_config["base_url"], class: "form-control"%>
+												</div>
+											</div>											
+										</div>
+										<div class="row">
+											<div class="col-12 col-md-6 col-lg-4">
+												<div class="card shadow" style="border: 1px solid #ddd;">
+													<div class="card-body">
+														<h3>Authentication</h3>
+														<div class="row">
+															<div class="col-12 col-md-6 col-lg-6">
+																<div class="form-group">
+																	<label for="">Access Token Path (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+																	<%= field.text_field :auth, value: @setting.api_config["auth"], class: "form-control"%>
+																</div>
+															</div>
+															<div class="col-12 col-md-6 col-lg-6">
+																<div class="form-group">
+																	<label for="">Login <i class="fas fa-asterisk required"></i></label>
+																	<%= field.text_field :auth_login, value: @setting.api_config["auth_login"], class: "form-control"%>
+																</div>
+															</div>
+															<div class="col-12 col-md-6 col-lg-6">
+																<div class="form-group">
+																	<label for="">Password <i class="fas fa-asterisk required"></i></label>
+																	<%= field.text_field :auth_password, value: @setting.api_config["auth_password"], class: "form-control"%>
+																</div>
+															</div>
+															<div class="col-12 col-md-6 col-lg-6">
+																<div class="form-group">
+																	<label for="">DB <i class="fas fa-asterisk required"></i></label>
+																	<%= field.text_field :auth_db, value: @setting.api_config["auth_db"], class: "form-control"%>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+
+											<div class="col-12 col-md-6 col-lg-4">
+												<div class="card shadow" style="border: 1px solid #ddd;">
+													<div class="card-body">
+														<h3>Parts / Products</h3>
+														<div class="row">
+															<div class="col-12 col-md-6 col-lg-6">
+																<div class="form-group">
+																	<label for="">Product Search Path (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+																	<%= field.text_field :product_list, value: @setting.api_config["product_list"], class: "form-control"%>
+																</div>
+															</div>
+															<div class="col-12 col-md-6 col-lg-6">
+																<div class="form-group">
+																	<label for="">Product Creation Path(<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+																	<%= field.text_field :product_creation, value: @setting.api_config["product_creation"], class: "form-control"%>
+																</div>
+															</div>
+															<div class="col-12 col-md-6 col-lg-6">
+																<div class="form-group">
+																	<label for="">Product Update Path (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+																	<%= field.text_field :product_update, value: @setting.api_config["product_update"], class: "form-control"%>
+																</div>
+															</div>
+															<div class="col-12 col-md-6 col-lg-6">
+																<div class="form-group">
+																	<label for="">Product Delete (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+																	<%= field.text_field :product_delete, value: @setting.api_config["product_delete"], class: "form-control"%>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+
+											<div class="col-12 col-md-6 col-lg-4">
+												<div class="card shadow" style="border: 1px solid #ddd;">
+													<div class="card-body">
+														<h3>Documents</h3>
+														<div class="row">
+															<div class="col-12 col-md-6 col-lg-6">
+																<div class="form-group">
+																	<label for="">Document Search Path (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+																	<%= field.text_field :document_search, value: @setting.api_config["document_search"], class: "form-control"%>
+																</div>
+															</div>
+															<div class="col-12 col-md-6 col-lg-6">
+																<div class="form-group">
+																	<label for="">Document Create Path (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+																	<%= field.text_field :document_create, value: @setting.api_config["document_create"], class: "form-control"%>
+																</div>
+															</div>
+															<div class="col-12 col-md-6 col-lg-6">
+																<div class="form-group">
+																	<label for="">Document Delete (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+																	<%= field.text_field :document_delete, value: @setting.api_config["document_delete"], class: "form-control"%>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+
+											<div class="col-12 col-md-6 col-lg-4">
+												<div class="card shadow" style="border: 1px solid #ddd;">
+													<div class="card-body">
+														<h3>BOM / BOM Components</h3>
+														<div class="row">
+															<div class="col-12 col-md-6 col-lg-6">
+																<div class="form-group">
+																	<label for="">BOM Search Path (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+																	<%= field.text_field :bom_search, value: @setting.api_config["bom_search"], class: "form-control"%>
+																</div>
+															</div>
+															<div class="col-12 col-md-6 col-lg-6">
+																<div class="form-group">
+																	<label for="">BOM Creation Path(<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+																	<%= field.text_field :bom_create, value: @setting.api_config["bom_create"], class: "form-control"%>
+																</div>
+															</div>
+															<div class="col-12 col-md-6 col-lg-6">
+																<div class="form-group">
+																	<label for="">BOM Update Path (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+																	<%= field.text_field :bom_update, value: @setting.api_config["bom_update"], class: "form-control"%>
+																</div>
+															</div>
+															<div class="col-12 col-md-6 col-lg-6">
+																<div class="form-group">
+																	<label for="">BOM Delete (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+																	<%= field.text_field :bom_delete, value: @setting.api_config["bom_delete"], class: "form-control"%>
+																</div>
+															</div>
+															<div class="col-12 col-md-6 col-lg-6">
+																<div class="form-group">
+																	<label for="">BOM Component Delete (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
+																	<%= field.text_field :bom_component_delete, value: @setting.api_config["bom_component_delete"], class: "form-control"%>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+
+											
 										</div>
 									</div>
-									<div class="col-12 col-md-4 col-lg-3">
-										<div class="form-group">
-											<label for="">Access Token Path (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
-											<%= field.text_field :auth, value: @setting.api_config["auth"], class: "form-control"%>
-										</div>
-									</div>
-									<div class="col-12 col-md-4 col-lg-3">
-										<div class="form-group">
-											<label for="">Login <i class="fas fa-asterisk required"></i></label>
-											<%= field.text_field :auth_login, value: @setting.api_config["auth_login"], class: "form-control"%>
-										</div>
-									</div>
-									<div class="col-12 col-md-4 col-lg-3">
-										<div class="form-group">
-											<label for="">Password <i class="fas fa-asterisk required"></i></label>
-											<%= field.text_field :auth_password, value: @setting.api_config["auth_password"], class: "form-control"%>
-										</div>
-									</div>
-									<div class="col-12 col-md-4 col-lg-3">
-										<div class="form-group">
-											<label for="">DB <i class="fas fa-asterisk required"></i></label>
-											<%= field.text_field :auth_db, value: @setting.api_config["auth_db"], class: "form-control"%>
-										</div>
-									</div>
-									<div class="col-12 col-md-4 col-lg-3">
-										<div class="form-group">
-											<label for="">Product Search Path (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
-											<%= field.text_field :product_list, value: @setting.api_config["product_list"], class: "form-control"%>
-										</div>
-									</div>
-									<div class="col-12 col-md-4 col-lg-3">
-										<div class="form-group">
-											<label for="">Product Creation Path(<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
-											<%= field.text_field :product_creation, value: @setting.api_config["product_creation"], class: "form-control"%>
-										</div>
-									</div>
-									<div class="col-12 col-md-4 col-lg-3">
-										<div class="form-group">
-											<label for="">Product Update Path (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
-											<%= field.text_field :product_update, value: @setting.api_config["product_update"], class: "form-control"%>
-										</div>
-									</div>
-									<div class="col-12 col-md-4 col-lg-3">
-										<div class="form-group">
-											<label for="">Product Delete (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
-											<%= field.text_field :product_delete, value: @setting.api_config["product_delete"], class: "form-control"%>
-										</div>
-									</div>
-									<div class="col-12 col-md-4 col-lg-3">
-										<div class="form-group">
-											<label for="">BOM Search Path (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
-											<%= field.text_field :bom_search, value: @setting.api_config["bom_search"], class: "form-control"%>
-										</div>
-									</div>
-									<div class="col-12 col-md-4 col-lg-3">
-										<div class="form-group">
-											<label for="">BOM Creation Path(<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
-											<%= field.text_field :bom_create, value: @setting.api_config["bom_create"], class: "form-control"%>
-										</div>
-									</div>
-									<div class="col-12 col-md-4 col-lg-3">
-										<div class="form-group">
-											<label for="">BOM Update Path (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
-											<%= field.text_field :bom_update, value: @setting.api_config["bom_update"], class: "form-control"%>
-										</div>
-									</div>
-									<div class="col-12 col-md-4 col-lg-3">
-										<div class="form-group">
-											<label for="">BOM Delete (<small>Ex: /api/example</small>) <i class="fas fa-asterisk required"></i></label>
-											<%= field.text_field :bom_delete, value: @setting.api_config["bom_delete"], class: "form-control"%>
-										</div>
-									</div>
+									
 								<%end%>
 							</div>
 						</div>

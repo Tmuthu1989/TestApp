@@ -1,5 +1,5 @@
 class OdooService
-	attr_accessor :base_url, :api_config, :setting, :xml_file_id
+	attr_accessor :base_url, :api_config, :setting, :xml_file_id, :request_type
 	def initialize(setting=nil, xml_file_id=nil)
 		self.setting = setting || Setting.last 
 		self.api_config = self.setting.api_config.to_obj
@@ -35,7 +35,7 @@ class OdooService
 				backtrace: e.backtrace
 			}
 		end
-		HttpRequest.create(req_body: body, res_body: res_body, error: error, xml_file_id: xml_file_id, req_url: api_url)
+		HttpRequest.create(req_body: body, request_type: "Auth", res_body: res_body, error: error, xml_file_id: xml_file_id, req_url: api_url)
 		setting.access_token
 	end
 
@@ -52,8 +52,9 @@ class OdooService
 		result = []
 		res_body = {}
 		error = {}
+		@request_type = "Search Part"
 		api_url = "#{base_url}#{}"
-		response = odoo_request(api_config.product_list, body, setting.cookie)
+		response = odoo_request(api_config.product_list, body, setting.cookie)[0]
 		result = response ? response.result.product_list : []
 	end
 
@@ -69,9 +70,9 @@ class OdooService
 		}
 		result = nil
 		error = {}
-		res_body = {}
+		@request_type = from_update ? "Update Parts" : "Create Parts"
 		url = from_update ? api_config.product_update : api_config.product_creation
-		odoo_request(url, body, setting.cookie)
+		odoo_request(url, body, setting.cookie)[0]
 	end
 
 	def update_products(products)
@@ -90,11 +91,11 @@ class OdooService
 		}
 		result = nil
 		error = {}
-		res_body = {}
-		odoo_request(api_config.product_delete, body, setting.cookie)
+		@request_type = "Delete Parts"
+		odoo_request(api_config.product_delete, body, setting.cookie)[0]
 	end
 
-	def search_bom_components(components=[])
+	def search_boms(components=[])
 		retries = 0
 		access_token = setting.access_token || get_access_token
 		params = {
@@ -106,15 +107,15 @@ class OdooService
 		}
 		result = []
 		error = {}
-		res_body = {}
-		response = odoo_request(api_config.bom_search, body, setting.cookie)
+		@request_type = "Search BOMs"
+		response = odoo_request(api_config.bom_search, body, setting.cookie)[0]
 		if response
-			response.result.search_values
+			result = response.result.search_values
 		end
 		result
 	end
 
-	def create_bom_components(components)
+	def create_boms(components)
 		retries = 0
 		access_token = setting.access_token || get_access_token
 		params = {
@@ -126,11 +127,11 @@ class OdooService
 		}
 		result = nil
 		error = {}
-		res_body = {}
-		odoo_request(api_config.bom_create, body, setting.cookie)
+		@request_type = "Create BOMs"
+		odoo_request(api_config.bom_create, body, setting.cookie)[0]
 	end
 
-	def update_bom_components(components)
+	def update_boms(components)
 		retries = 0
 		access_token = setting.access_token || get_access_token
 		params = {
@@ -142,11 +143,28 @@ class OdooService
 		}
 		result = nil
 		error = {}
-		res_body = {}
-		odoo_request(api_config.bom_update, body, setting.cookie)
+		@request_type = "Update BOMs"
+		odoo_request(api_config.bom_update, body, setting.cookie)[0]
 	end
 
-	def delete_bom_components(components)
+	def delete_bom_components(bom_ids, components)
+		retries = 0
+		access_token = setting.access_token || get_access_token
+		params = {
+			"access_token" => access_token,
+			"bom_id" => bom_ids,
+			"del_child_ids" => components
+		}
+		body = {
+			"params" => params
+		}
+		result = []
+		error = {}
+		@request_type = "Delete BOM components"
+		odoo_request(api_config.bom_component_delete, body, setting.cookie)
+	end
+
+	def delete_boms(components)
 		retries = 0
 		access_token = setting.access_token || get_access_token
 		params = {
@@ -160,22 +178,24 @@ class OdooService
 		}
 		result = nil
 		error = {}
-		res_body = {}
-		odoo_request(api_config.bom_delete, body, setting.cookie)
+		@request_type = "Delete BOMs"
+		odoo_request(api_config.bom_delete, body, setting.cookie)[0]
 	end
 	
-	def odoo_error(response)
+	def odoo_error(error)
 		{
-			error_type: response.error.message,
-			title: response.error.message,
-			message: response.error.message,
-			backtrace: response.error.data
+			error_type: error.message,
+			title: error.message,
+			message: error.message,
+			backtrace: error.data
 		}
 	end
 
 	def odoo_request(url, body, cookie=nil)
 		response = nil
 		retries = 0
+		res_body = {}
+		error = {}
 		begin
 			api_url = "#{base_url}#{url}"
 			response = HttpService.new(api_url).post(body, cookie)
@@ -185,8 +205,8 @@ class OdooService
 				retries += 1
 				get_access_token
 				raise
-			elsif response.error.present?
-				error = odoo_error(response)
+			elsif response.error.present? || (response.result && response.result.status == "error")
+				error = odoo_error(response.error || response.result)
 			else
 				result = response
 			end
@@ -203,8 +223,8 @@ class OdooService
 				}
 			end
 		end
-		HttpRequest.create(req_body: body, res_body: res_body, error: error, xml_file_id: xml_file_id, req_url: api_url)	
-		response
+		HttpRequest.create(req_body: body, request_type: @request_type, res_body: res_body, error: error, xml_file_id: xml_file_id, req_url: api_url)	
+		[response, error[:message]]
 	end
 	
 end

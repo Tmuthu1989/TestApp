@@ -2,13 +2,12 @@ class Part < ApplicationRecord
   belongs_to :xml_file
   before_save :set_odo_body
   scope :inwork, -> {where(state: "INWORK")}
-  scope :pending_parts, -> {where.not(status: AppConstants::FILE_STATUS[:success])}
-  scope :success_parts, -> {where(status: AppConstants::FILE_STATUS[:success])}
-  scope :added_parts, -> {where(part_type: "AddedParts")}
-  scope :added_parts, -> {where(part_type: "AddedParts")}
-  scope :changed_parts, -> {where(part_type: "ChangedParts")}
-  scope :unchanged_parts, -> {where(part_type: "UnchangedParts")}
-  scope :deleleted_parts, -> {where(part_type: "DeletedParts")}
+  scope :pending, -> {where.not(status: AppConstants::FILE_STATUS[:success])}
+  scope :success, -> {where(status: AppConstants::FILE_STATUS[:success])}
+  scope :added, -> {where(part_type: "AddedParts")}
+  scope :changed, -> {where(part_type: "ChangedParts")}
+  scope :unchanged, -> {where(part_type: "UnchangedParts")}
+  scope :deleleted, -> {where(part_type: "DeletedParts")}
 
   def self.load_parts(xml_file)
     json_obj = xml_file.json_obj
@@ -27,7 +26,27 @@ class Part < ApplicationRecord
     end
   end
 
+  def validate_part
+    part = self.part_json.to_obj
+    error = {}
+    length = part.LENGTH.to_s.split(" ")[0].to_s.gsub("E", '')
+    height = part.HEIGHT.to_s.split(" ")[0].to_s.gsub("E", '')
+    width = part.WIDTH.to_s.split(" ")[0].to_s.gsub("E", '')
+    mass = (part.MASS.present? ? part.MASS.to_s[0...-2].strip : "").to_s.split(" ")[0].to_s.gsub("E", '')
+    error[:classification_code] = true if part.CLASSIFICATION_CODE.to_s.strip.blank?
+    error[:part_number] = true if part.Number.to_s.strip.blank?
+    error[:part_name] = true if part.Name.blank?
+    error[:created_by] = true if self.created_by.blank?
+    error[:updated_by] = true if part.LastChangedBy.blank?
+    error[:length] = true if length.present? && length.to_s.count("a-zA-Z") > 0
+    error[:width] = true if width.present? && width.to_s.count("a-zA-Z") > 0
+    error[:height] = true if height.present? && height.to_s.count("a-zA-Z") > 0
+    error[:mass] = true if mass.present? && mass.to_s.count("a-zA-Z") > 0
+    self.error = error
+  end
+
   def set_odo_body
+    validate_part
     part = self.part_json.to_obj
     odoo_part_number = "#{part.CLASSIFICATION_CODE}#{part.Version}"
     body = {
@@ -58,7 +77,8 @@ class Part < ApplicationRecord
 
   def self.process_parts(xml_file)
     begin
-      parts = xml_file.parts.where.not(status: AppConstants::FILE_STATUS[:success]).group_by(&:part_type)
+      @setting = Setting.last
+      parts = xml_file.parts.pending.where(error: {}).group_by(&:part_type)
       @odoo_service = OdooService.new(@setting, xml_file.id)
       added_parts = []
       added_parts = parts["AddedParts"].map { |e|  e.odoo_body } if parts["AddedParts"].present?
@@ -66,7 +86,6 @@ class Part < ApplicationRecord
       other_parts = parts["ChangedParts"].map { |e|  e.odoo_body } if parts["ChangedParts"].present?
       other_parts += parts["UnchangedParts"].map { |e|  e.odoo_body } if parts["UnchangedParts"].present?
       deleleted_parts = parts["DeletedParts"].map { |e|  e.odoo_body["part"] } if parts["DeletedParts"].present?
-      @setting = Setting.last
       process_added_parts(added_parts) if added_parts.present?
       process_other_parts(other_parts) if other_parts.present?
       process_deleted_parts(deleleted_parts) if deleleted_parts.present?
