@@ -24,6 +24,6 @@ class BaseService
 
   private
     def setting_params
-      params.require(:setting).permit(:app_name, :xml_files_path, :delete_file, :rename_document, {api_config: [:base_url, :auth, :product_creation, :product_update, :product_list, :product_delete, :auth_login, :auth_password, :auth_db, :bom_search, :bom_create, :bom_update, :bom_delete, :bom_component_delete, :document_search, :document_create, :document_delete, :document_upload]} )
+      params.require(:setting).permit(:app_name, :xml_files_path, :documents_folder, :delete_file, :rename_document, {api_config: [:base_url, :auth, :product_creation, :product_update, :product_list, :product_delete, :auth_login, :auth_password, :auth_db, :bom_search, :bom_create, :bom_update, :bom_delete, :bom_component_delete, :document_search, :document_create, :document_delete, :document_upload, :obs_url]} )
     end
 end

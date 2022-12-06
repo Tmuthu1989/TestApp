@@ -110,6 +110,7 @@ class Part < ApplicationRecord
     parts_to_be_updated = []
     added_parts = []
     existing_products = @odoo_service.get_products(parts.map{|part| part["part"]})
+    existing_products.map { |product| product.default_code.to_s }
     parts.each do |part|
       if existing_products.include?(part["part"])
         parts_to_be_updated << part

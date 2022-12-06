@@ -1,7 +1,8 @@
 Setting.destroy_all
 Setting.create(
-	xml_files_path: "/home/tringapps/Desktop", 
+	xml_files_path: "C:/xml_files", 
 	app_name: "Read XML",
+	documents_folder: "C:/documents",
 	api_config: {
 		"base_url" => "https://odoo-test.jungo.eu",
 		"auth" => "/api/token",
@@ -21,6 +22,7 @@ Setting.create(
 		"document_create" => "/api/part_doc_create",
 		"document_delete" => "/api/document_delete",
 		"document_upload" => "/api/product_image",
+		"obs_url" => "https://obs.eu-de.otc.t-systems.com:443/windchill-odoo-doc-test"
 	}
 )
 User.find_or_create_by(email: "admin@app.com") do |t|

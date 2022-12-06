@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_12_01_100947) do
+ActiveRecord::Schema[7.0].define(version: 2022_12_06_105942) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -68,6 +68,30 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_01_100947) do
     t.index ["number"], name: "index_bom_headers_on_number"
     t.index ["odoo_part_number"], name: "index_bom_headers_on_odoo_part_number"
     t.index ["xml_file_id"], name: "index_bom_headers_on_xml_file_id"
+  end
+
+  create_table "documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "doc_type"
+    t.uuid "xml_file_id", null: false
+    t.string "number"
+    t.string "name"
+    t.string "document_type"
+    t.string "document_number"
+    t.string "document_url"
+    t.string "odoo_part_number"
+    t.string "part_number"
+    t.string "status", default: "Pending"
+    t.jsonb "error", default: {}
+    t.text "xml_content"
+    t.jsonb "json_obj", default: {}
+    t.jsonb "odoo_body", default: {}
+    t.string "original_file_name"
+    t.string "new_file_name"
+    t.string "extention"
+    t.string "new_extention"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["xml_file_id"], name: "index_documents_on_xml_file_id"
   end
 
   create_table "http_requests", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -128,6 +152,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_01_100947) do
     t.string "cookie"
     t.boolean "delete_file", default: false
     t.boolean "rename_document", default: true
+    t.string "documents_folder"
   end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -157,6 +182,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_01_100947) do
   add_foreign_key "bom_components", "bom_headers"
   add_foreign_key "bom_components", "xml_files"
   add_foreign_key "bom_headers", "xml_files"
+  add_foreign_key "documents", "xml_files"
   add_foreign_key "http_requests", "xml_files"
   add_foreign_key "parts", "xml_files"
 end

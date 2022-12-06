@@ -1,0 +1,31 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  type: 
+  xml_file: one
+  number: MyString
+  name: MyString
+  document_type: MyString
+  document_number: MyString
+  document_url: MyString
+  part_number: MyString
+  status: MyString
+  error: 
+  xml_content: MyText
+  jsob_obj: 
+  odoo_body: 
+
+two:
+  type: 
+  xml_file: two
+  number: MyString
+  name: MyString
+  document_type: MyString
+  document_number: MyString
+  document_url: MyString
+  part_number: MyString
+  status: MyString
+  error: 
+  xml_content: MyText
+  jsob_obj: 
+  odoo_body: 

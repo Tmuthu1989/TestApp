@@ -3,17 +3,24 @@
 	<div class="card-body">
 		<%= form_for(@setting, url: settings_path, method: :post) do |f|%>
 			<div class="row">
-				<div class="col-12 col-sm-6 col-md-4 col-lg-3">
+				<div class="col-12 col-sm-6 col-md-4 col-lg-2">
 					<div class="form-group">
 						<label for="">Application Name <i class="fa fa-asterisk required"></i></label>
 						<%= f.text_field :app_name, class: "form-control", required: true%>
 					</div>
 				</div>
 
-				<div class="col-12 col-sm-6 col-md-4 col-lg-3">
+				<div class="col-12 col-sm-6 col-md-4 col-lg-2">
 					<div class="form-group">
 						<label for="">XML Files Path <small>(Eg.: /home/Desktop/)</small><i class="fa fa-asterisk required"></i></label>
 						<%= f.text_field :xml_files_path, class: "form-control", required: true%>
+					</div>
+				</div>
+
+				<div class="col-12 col-sm-6 col-md-4 col-lg-2">
+					<div class="form-group">
+						<label for="">Documents Folder <small>(Eg.: /home/Desktop/)</small><i class="fa fa-asterisk required"></i></label>
+						<%= f.text_field :documents_folder, class: "form-control", required: true%>
 					</div>
 				</div>
 
@@ -50,6 +57,12 @@
 												<div class="form-group">
 													<label for="">Base URL (<small>Ex: https://www.example.com</small>) <i class="fas fa-asterisk required"></i></label>
 													<%= field.url_field :base_url, value: @setting.api_config["base_url"], class: "form-control"%>
+												</div>
+											</div>			
+											<div class="col-12 col-md-4 col-lg-3">
+												<div class="form-group">
+													<label for="">OBS URL (<small>Ex: https://www.example.com</small>) <i class="fas fa-asterisk required"></i></label>
+													<%= field.url_field :obs_url, value: @setting.api_config["obs_url"], class: "form-control"%>
 												</div>
 											</div>											
 										</div>

@@ -109,7 +109,7 @@ class OdooService
 		error = {}
 		@request_type = "Search BOMs"
 		response = odoo_request(api_config.bom_search, body, setting.cookie)[0]
-		if response
+		if response.body
 			result = response.result.search_values
 		end
 		result
@@ -181,6 +181,58 @@ class OdooService
 		@request_type = "Delete BOMs"
 		odoo_request(api_config.bom_delete, body, setting.cookie)[0]
 	end
+
+	def search_documents
+		retries = 0
+		access_token = setting.access_token || get_access_token
+		params = {
+			"access_token" => access_token,
+			"search_list" => [{part_no: []}]
+		}
+		body = {
+			"params" => params
+		}
+		result = []
+		error = {}
+		@request_type = "Search Documents"
+		response = odoo_request(api_config.document_search, body, setting.cookie)[0]
+		if response.body
+			result = response.result.document_list
+		end
+		result
+	end
+
+	def create_documents(documents)
+		retries = 0
+		access_token = setting.access_token || get_access_token
+		params = {
+			"access_token" => access_token,
+			"document_list" => documents
+		}
+		body = {
+			"params" => params
+		}
+		result = nil
+		error = {}
+		@request_type = "Create Documents"
+		odoo_request(api_config.document_create, body, setting.cookie)[0]
+	end
+
+	def delete_documents(documents)
+		retries = 0
+		access_token = setting.access_token || get_access_token
+		params = {
+			"access_token" => access_token,
+			"delete_list" => [{part_no: documents}]
+		}
+		body = {
+			"params" => params
+		}
+		result = nil
+		error = {}
+		@request_type = "Delete Documents"
+		odoo_request(api_config.document_delete, body, setting.cookie)[0]
+	end
 	
 	def odoo_error(error)
 		{
@@ -198,9 +250,9 @@ class OdooService
 		error = {}
 		begin
 			api_url = "#{base_url}#{url}"
-			response = HttpService.new(api_url).post(body, cookie)
-			res_body = response
-			response = response.to_obj
+			resp = HttpService.new(api_url).post(body, cookie)
+			res_body = resp.body.present? ? JSON.parse(resp.body) : {}
+			response = resp.to_obj
 			if (response.error.present? && response.error.data.name === "builtins.KeyError") || (response.result.present? && response.result.status == "error" && response.result.message.include?("Access Token"))
 				retries += 1
 				get_access_token
