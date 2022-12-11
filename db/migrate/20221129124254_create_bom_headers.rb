@@ -9,7 +9,7 @@ class CreateBomHeaders < ActiveRecord::Migration[7.0]
       t.string :status, default: AppConstants::FILE_STATUS[:pending]
       t.jsonb :json_obj, default: {}
       t.text :xml_content
-      t.text :error
+      t.jsonb :error, default: {}
       t.index :bom_type
       t.index :number
       t.index :odoo_part_number

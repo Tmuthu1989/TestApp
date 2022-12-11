@@ -1,0 +1,84 @@
+
+<div class="row">
+  
+  <div class="col-12 mb-2">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <a class="nav-link <%= 'active' if params[:type].blank?%>" id="xml_file_details-tab" href='<%= xml_file_bom_headers_path(@xml_file)%>' data-toggles="tab" data-targets="#xml_file_details" type="button" role="tab" aria-controls="home" aria-selected="true">All BOMs</a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link <%= 'active' if params[:type] === 'AddedBOMs'%>" id="BOMHeaders-tab"  href='<%= xml_file_bom_headers_by_type_path(@xml_file, "AddedBOMs")%>' data-toggles="tab" data-targets="#BOMHeaders" type="button" role="tab" aria-controls="BOMHeaders" aria-selected="false">Added BOMs</a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link <%= 'active' if params[:type] === 'ChangedBOMs'%>" id="BOMs-tab"  href='<%= xml_file_bom_headers_by_type_path(@xml_file, "ChangedBOMs")%>' data-toggles="tab" data-targets="#BOMHeaders" type="button" role="tab" aria-controls="BOMHeaders" aria-selected="false">Changed BOMs</a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link <%= 'active' if params[:type] === 'UnchangedBOMs'%>" id="BOMHeaders-tab"  href='<%= xml_file_bom_headers_by_type_path(@xml_file, "UnchangedBOMs")%>' data-toggles="tab" data-targets="#BOMHeaders" type="button" role="tab" aria-controls="BOMHeaders" aria-selected="false">Unchanged BOMs</a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link <%= 'active' if params[:type] === 'DeletedBOMs'%>" id="BOMHeaders-tab"  href='<%= xml_file_bom_headers_by_type_path(@xml_file, "DeletedBOMs")%>' data-toggles="tab" data-targets="#parts" type="button" role="tab" aria-controls="parts" aria-selected="false">Deleted Boms</a>
+      </li>
+      </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+      <div class="tab-pane fade show active">
+        <div class="row">
+          <div class="col-12 no-padding" style="width:90%; ">
+            <div class="row">
+              <div class="col-12" >
+                <%#= paginate @parts, theme: 'twitter-bootstrap-4', :pagination_class => "pagination justify-content-center" %>
+                <table class="table table-bordered table-striped mb-3">
+                  <thead>
+                    <tr>
+                      <th style="width: 15%;">BOM Type</th>
+                      <th style="width: 15%;">BOM Number</th>
+                      <th style="width: 15%;">Odoo BOM Number</th>
+                      <th style="width: 15%;">Status</th>
+                      <th style=""></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <%if @bom_headers.present?%>
+                      <%@bom_headers.each do |bom_header|%>
+                        <tr>
+                          <td><%= bom_header.bom_type%></td>
+                          <td><%= bom_header.number%></td>
+                          <td><%= bom_header.odoo_part_number%></td>
+                          <td><%= render "common/status", status: bom_header.status%><% if bom_header.error.present?%><%= render "common/error", message: "#{bom_header.error.keys.join(", ")} components having error"%><%end%></td>
+                          <td>
+                            <%= link_to [@xml_file, bom_header], class: "btn btn-info", remote: true do %>
+                              <i class="fa fa-eye"></i>
+                            <% end -%>
+                            <%if bom_header.pending?%>
+                              <%= link_to edit_xml_file_bom_header_path(@xml_file, bom_header), class: "btn btn-warning", remote: true do %>
+                                <i class="fa fa-edit"></i>
+                              <% end -%>
+                              <%= link_to xml_file_bom_header_re_process_path(@xml_file, bom_header), class: "btn btn-success" do %>
+                                <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                              <% end -%>
+                            <%end%>
+                            <%= link_to xml_file_bom_header_req_body_path(@xml_file, bom_header), class: "btn btn-secondary", remote: true do %>
+                              <i class="fas fa-code" aria-hidden="true"></i>
+                            <% end -%>
+                          </td>
+                        </tr>
+                      <%end%>
+                    <%else%>
+                      <tr>
+                        <td colspan="6" class="text-danger text-center"><h4>No BOMs Found!</h4></td>
+                      </tr>
+                    <% end -%>
+                    
+                  </tbody>
+                </table>
+                <%= paginate @bom_headers, theme: 'twitter-bootstrap-4', :pagination_class => "pagination justify-content-center" %>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</div>

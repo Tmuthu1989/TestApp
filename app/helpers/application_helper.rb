@@ -8,6 +8,10 @@ module ApplicationHelper
 	end
 
 	def check_active(path, is_root=false)
-		(request.path === path || request.path.include?("/#{path}") || request.path.include?("#{path}/")) || (is_root && request.path === "/") ? 'active' : ''
+		'active' if (request.path === path || request.path.include?("/#{path}") || request.path.include?("#{path}/")) || (is_root && request.path === "/")
+	end
+
+	def is_active?(path)
+		"active" if request.path === path
 	end
 end

@@ -1,0 +1,87 @@
+<%page_name "Parts - #{@xml_file.file_name}"%>
+
+<div class="row">
+  
+  <div class="col-12 mb-2">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <a class="nav-link <%= 'active' if params[:type].blank?%>" id="xml_file_details-tab" href='<%= xml_file_parts_path(@xml_file)%>' data-toggles="tab" data-targets="#xml_file_details" type="button" role="tab" aria-controls="home" aria-selected="true">All Parts</a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link <%= 'active' if params[:type] === 'AddedParts'%>" id="parts-tab"  href='<%= xml_file_parts_by_type_path(@xml_file, "AddedParts")%>' data-toggles="tab" data-targets="#parts" type="button" role="tab" aria-controls="parts" aria-selected="false">Added Parts</a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link <%= 'active' if params[:type] === 'ChangedParts'%>" id="parts-tab"  href='<%= xml_file_parts_by_type_path(@xml_file, "ChangedParts")%>' data-toggles="tab" data-targets="#parts" type="button" role="tab" aria-controls="parts" aria-selected="false">Changed Parts</a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link <%= 'active' if params[:type] === 'UnchangedParts'%>" id="parts-tab"  href='<%= xml_file_parts_by_type_path(@xml_file, "UnchangedParts")%>' data-toggles="tab" data-targets="#parts" type="button" role="tab" aria-controls="parts" aria-selected="false">Unchanged Parts</a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link <%= 'active' if params[:type] === 'DeletedParts'%>" id="parts-tab"  href='<%= xml_file_parts_by_type_path(@xml_file, "DeletedParts")%>' data-toggles="tab" data-targets="#parts" type="button" role="tab" aria-controls="parts" aria-selected="false">Deleted Parts</a>
+      </li>
+      </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+      <div class="tab-pane fade show active">
+        <div class="row">
+          <div class="col-12 no-padding" style="width:90%; ">
+            <div class="row">
+              <div class="col-12" >
+                <%#= paginate @parts, theme: 'twitter-bootstrap-4', :pagination_class => "pagination justify-content-center" %>
+                <table class="table table-bordered table-striped mb-3">
+                  <thead>
+                    <tr>
+                      <th style="width: 15%;">Part Type</th>
+                      <th style="width: 15%;">Part Number</th>
+                      <th style="width: 15%;">Part Name</th>
+                      <th style="width: 15%;">Odoo Part Number</th>
+                      <th style="width: 15%;">Status</th>
+                      <th style=""></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <%if @parts.present?%>
+                      <%@parts.each do |part|%>
+                        <tr>
+                          <td><%= part.part_type%></td>
+                          <td><%= part.part_number%></td>
+                          <td><%= part.part_name%></td>
+                          <td><%= part.odoo_part_number%></td>
+                          <td><%= render "common/status", status: part.status%><% if part.error.present?%><%= render "common/error", message: "#{obj.error.keys.join(", ")} are required"%><%end%></td>
+                          <td>
+                            <%= link_to [@xml_file, part], class: "btn btn-info", remote: true do %>
+                              <i class="fa fa-eye"></i>
+                            <% end -%>
+                            <%if part.pending?%>
+                              <%= link_to edit_xml_file_part_path(@xml_file, part), class: "btn btn-warning", remote: true do %>
+                                <i class="fa fa-edit"></i>
+                              <% end -%>
+                              <%= link_to xml_file_part_re_process_path(@xml_file, part), class: "btn btn-success" do %>
+                                <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                              <% end -%>
+                            <%end%>
+                            <%= link_to xml_file_part_req_body_path(@xml_file, part), class: "btn btn-secondary", remote: true do %>
+                              <i class="fas fa-code" aria-hidden="true"></i>
+                            <% end -%>
+                          </td>
+                        </tr>
+                      <%end%>
+                    <%else%>
+                      <tr>
+                        <td colspan="6" class="text-danger text-center"><h4>No Parts Found!</h4></td>
+                      </tr>
+                    <% end -%>
+                    
+                  </tbody>
+                </table>
+                <%= paginate @parts, theme: 'twitter-bootstrap-4', :pagination_class => "pagination justify-content-center" %>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</div>

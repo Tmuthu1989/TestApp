@@ -1,0 +1,25 @@
+<div class="modal-header">
+  <h4 class="modal-title">
+    BOM - <%= "#{@bom_header.number} (#{@bom_header.odoo_part_number})"%>
+  </h4>
+  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<div class="modal-body">
+  <div class="row">
+    <div class="col-12">
+      <pre id="json-code">
+      </pre>      
+    </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <%if @bom_header.status != AppConstants::FILE_STATUS[:success]%>
+    <%= link_to xml_file_bom_header_re_process_path(@bom_header.xml_file_id, @bom_header), class: "btn btn-success" do %>
+      <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+    <% end -%>
+  <% end -%>
+  <button class="btn btn-success" onclick="copyContent('json-code')">Copy Request Body</button>
+  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+</div>

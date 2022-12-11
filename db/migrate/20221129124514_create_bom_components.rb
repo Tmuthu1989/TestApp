@@ -15,7 +15,7 @@ class CreateBomComponents < ActiveRecord::Migration[7.0]
       t.jsonb :json_obj, default: {}
       t.text :xml_content
       t.jsonb :odoo_body, default: {}
-      t.text :error
+      t.jsonb :error, default: {}
       t.index :bom_component_type
       t.index :part_number
       t.index :assembly_part_number

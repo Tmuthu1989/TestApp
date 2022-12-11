@@ -7,7 +7,7 @@
    <meta name="description" content="Bootstrap Admin App">
    <meta name="keywords" content="app, responsive, jquery, bootstrap, dashboard, admin">
    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-   <title>Read XML</title><!-- =============== VENDOR STYLES ===============-->
+   <title><%= yield(:page_name)%></title><!-- =============== VENDOR STYLES ===============-->
    <!-- FONT AWESOME-->
    <link rel="stylesheet" href="/templates/admin/vendor/@fortawesome/fontawesome-free/css/brands.css">
    <link rel="stylesheet" href="/templates/admin/vendor/@fortawesome/fontawesome-free/css/regular.css">
@@ -64,7 +64,23 @@
 
    <script src="/templates/admin/js/app.js"></script>
    <%= javascript_importmap_tags %>
-
+   <%= render "common/modal"%>
+   <style>
+      .error-field{
+        border-color: #f05050!important
+      }
+   </style> 
+   <script>
+      const copyContent = async (elem) => {
+         let text = document.getElementById(elem).innerHTML;
+        try {
+          await navigator.clipboard.writeText(text);
+          console.log('Content copied to clipboard');
+        } catch (err) {
+          console.error('Failed to copy: ', err);
+        }
+      }
+   </script>   
 </body>
 
 </html>

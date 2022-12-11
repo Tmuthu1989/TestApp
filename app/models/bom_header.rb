@@ -9,6 +9,12 @@ class BomHeader < ApplicationRecord
   scope :unchanged, -> { where(bom_type: "UnchangedBOMs") }
   scope :deleted, -> { where(bom_type: "DeletedBOMs") }
 
+  accepts_nested_attributes_for :bom_components, reject_if: :all_blank, allow_destroy: true
+
+  def pending?
+    status != AppConstants::FILE_STATUS[:success]
+  end
+
 	def self.load_bom_headers(xml_file)
 		json_obj = xml_file.json_obj
     if json_obj
@@ -47,6 +53,19 @@ class BomHeader < ApplicationRecord
       }
       HttpRequest.create(error: error, xml_file_id: xml_file.id)
     end		
+	end
+
+	def self.process_bom(bom_header)
+		@setting = Setting.last
+		error = {}
+		@odoo_service = OdooService.new(@setting, bom_header.xml_file_id)
+		if bom_header.bom_type == "AddedBOMs"
+			result = BomHeader.process_added_boms([bom_header])
+		elsif bom_header.bom_type != "DeletedBOMs"
+			added_result, result = BomHeader.process_updated_boms([bom_header])
+		else
+			result = BomHeader.process_deleted_boms([bom_header])
+		end
 	end
 
 	def self.process_added_boms(bom_headers)
@@ -92,9 +111,10 @@ class BomHeader < ApplicationRecord
 			result = @odoo_service.create_boms(boms)
 			if result.present?
 				BomHeader.where(id: bom_header_ids).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "AddedBOMs") if bom_header_ids.present?
-				BomComponent.where(id: bom_component_ids).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "AddedBOMComponents") if bom_component_ids.present?
-				BomComponent.where(id: del_bom_component_ids).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "Added from DeletedBOMComponents") if del_bom_component_ids.present?
+				BomComponent.where(id: bom_component_ids).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "AddedBOMComponents", odoo_type: "Add") if bom_component_ids.present?
+				BomComponent.where(id: del_bom_component_ids).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "Added from DeletedBOMComponents", odoo_type: "Add") if del_bom_component_ids.present?
 			end
+			result
 		end
 	end
 
@@ -115,16 +135,21 @@ class BomHeader < ApplicationRecord
 			added_component_ids = []
 			bom_headers.each do |bom_header|
 				bom = bom_header
-				bom_components = bom_header.bom_components.where(bom_component_type: ["ChangedBOMComponents", "UnchangedBOMComponents"])
+				bom_components = bom_header.bom_components.where(bom_component_type: ["AddedBOMComponents", "ChangedBOMComponents", "UnchangedBOMComponents"])
 
 				deleted_components = bom_header.bom_components.where(bom_component_type: "DeletedBOMComponents").where.not(part_state: "INWORK", odoo_part_number: nil)
 				del_child_ids = deleted_components.pluck(:odoo_part_number).compact
 				if bom.odoo_part_number && del_child_ids.present?
 					delele_result = @odoo_service.delete_bom_components([bom.odoo_part_number], del_child_ids)
-					if delele_result[0].present?
-						deleted_components.update_all(status: AppConstants::FILE_STATUS[:success])
+					if delele_result[1].present?
+						deleted_components.update_all(error: {error: delele_result[1]})
+						err = bom_header.error
+						deleted_components.each do |comp|
+							err[comp.odoo_part_number] = delele_result[1]
+						end
+						bom_header.update(error: err)
 					else
-						deleted_components.update_all(error: deleted_components[1]) if deleted_components[1].present?
+						deleted_components.update_all(status: AppConstants::FILE_STATUS[:success])
 					end
 				end
 				if bom.odoo_part_number.present?
@@ -163,23 +188,26 @@ class BomHeader < ApplicationRecord
 			end
 			if create_boms.present?
 				add_result = @odoo_service.create_boms(create_boms)
-				BomHeader.where(id: added_bom_header_ids.uniq).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "Added by UpdateBOMs") if add_result && added_bom_header_ids.present?
-				BomComponent.where(id: added_component_ids).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "Added from UpdateBOMComponents") if add_result && added_component_ids.present?
+				BomHeader.where(id: added_bom_header_ids.uniq).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "Added by UpdateBOMs", odoo_type: "Add") if add_result && added_bom_header_ids.present?
+				BomComponent.where(id: added_component_ids).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "Added from UpdateBOMComponents", odoo_type: "Add") if add_result && added_component_ids.present?
 			end
 
 			if update_boms.present?
 				update_result = @odoo_service.update_boms(update_boms)
-				BomHeader.where(id: bom_header_ids.uniq).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "UpdateBOMs") if update_result && bom_header_ids.present?
-				BomComponent.where(id: bom_component_ids).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "UpdateBOMComponents") if update_result && bom_component_ids.present?
+				BomHeader.where(id: bom_header_ids.uniq).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "UpdateBOMs", odoo_type: "Update") if update_result && bom_header_ids.present?
+				BomComponent.where(id: bom_component_ids).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "UpdateBOMComponents", odoo_type: "Update") if update_result && bom_component_ids.present?
 			end
-
+			[add_result, update_result]
 		end
 	end
 
 	def self.process_deleted_boms(bom_headers)
 		if bom_headers.present?
-			result = @odoo_service.deleted_boms(bom_headers.pluck(:odoo_part_number).compact)
-			bom_headers.update(status: AppConstants::FILE_STATUS[:success]) if result
+			bom_components = BomComponent.deleted.where(bom_header_id: bom_headers.pluck(:id)).where.not(odoo_part_number: nil)
+			result = @odoo_service.deleted_boms(bom_headers.pluck(:odoo_part_number).compact, bom_components.pluck(:odoo_part_number).compact)
+			bom_headers.update(status: AppConstants::FILE_STATUS[:success], odoo_type: "Delete") if result
+			bom_components.update(status: AppConstants::FILE_STATUS[:success], odoo_type: "Delete") if result
+			result
 		end
 	end
 end

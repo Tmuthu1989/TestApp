@@ -1,0 +1,28 @@
+<%= form_for([@xml_file, @part]) do |f|%>
+  <div class="modal-header">
+    <h4 class="modal-title">Part -
+      <%= "#{@part.part_number} (#{@part.odoo_part_number})"%>
+    </h4>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="row">
+      <%= f.fields_for :odoo_body do |field|%>
+        <%@part.odoo_body.each do |key, value|%>
+          <div class="col-12 col-md-4">
+            <div class="form-group">
+              <label for=""><%=key.humanize%></label>
+              <%= field.text_field key, value: value, class: "form-control #{'error-field' if @part.error[key]}"%>
+            </div>
+          </div>
+        <% end -%>
+      <% end -%>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <%= f.submit "Save", class: "btn btn-success"%>
+    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+  </div>
+<%end%>

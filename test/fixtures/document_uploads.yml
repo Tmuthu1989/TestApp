@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  xml_file: one
+  document_number: MyString
+  part_number: MyString
+
+two:
+  xml_file: two
+  document_number: MyString
+  part_number: MyString

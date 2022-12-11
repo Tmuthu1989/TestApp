@@ -1,4 +1,5 @@
 class Part < ApplicationRecord
+  paginates_per 10
   belongs_to :xml_file
   before_save :set_odo_body
   scope :inwork, -> {where(state: "INWORK")}
@@ -8,6 +9,10 @@ class Part < ApplicationRecord
   scope :changed, -> {where(part_type: "ChangedParts")}
   scope :unchanged, -> {where(part_type: "UnchangedParts")}
   scope :deleleted, -> {where(part_type: "DeletedParts")}
+
+  def pending?
+    status != AppConstants::FILE_STATUS[:success]
+  end
 
   def self.load_parts(xml_file)
     json_obj = xml_file.json_obj
@@ -27,52 +32,55 @@ class Part < ApplicationRecord
   end
 
   def validate_part
-    part = self.part_json.to_obj
+    part = self.odoo_body.to_obj
     error = {}
-    length = part.LENGTH.to_s.split(" ")[0].to_s.gsub("E", '')
-    height = part.HEIGHT.to_s.split(" ")[0].to_s.gsub("E", '')
-    width = part.WIDTH.to_s.split(" ")[0].to_s.gsub("E", '')
-    mass = (part.MASS.present? ? part.MASS.to_s[0...-2].strip : "").to_s.split(" ")[0].to_s.gsub("E", '')
-    error[:classification_code] = true if part.CLASSIFICATION_CODE.to_s.strip.blank?
-    error[:part_number] = true if part.Number.to_s.strip.blank?
-    error[:part_name] = true if part.Name.blank?
-    error[:created_by] = true if self.created_by.blank?
-    error[:updated_by] = true if part.LastChangedBy.blank?
+    length = part.length.to_s.split(" ")[0].to_s.gsub("E", '')
+    height = part.height.to_s.split(" ")[0].to_s.gsub("E", '')
+    width = part.breadth.to_s.split(" ")[0].to_s.gsub("E", '')
+    mass = (part.weight.present? ? part.weight.to_s[0...-2].strip : "").to_s.split(" ")[0].to_s.gsub("E", '')
+    error[:classification_code] = true if part.classification_code.to_s.strip.blank?
+    error[:part_number] = true if part.default_code.to_s.strip.blank?
+    error[:part_name] = true if part.name.blank?
+    error[:created_by] = true if part.created_by_from_api.blank?
+    error[:updated_by] = true if part.updated_by_from_api.blank?
     error[:length] = true if length.present? && length.to_s.count("a-zA-Z") > 0
     error[:width] = true if width.present? && width.to_s.count("a-zA-Z") > 0
     error[:height] = true if height.present? && height.to_s.count("a-zA-Z") > 0
     error[:mass] = true if mass.present? && mass.to_s.count("a-zA-Z") > 0
+    self.odoo_part_number = part.part
     self.error = error
   end
 
   def set_odo_body
+    if self.id.blank?
+      part = self.part_json.to_obj
+      odoo_part_number = "#{part.CLASSIFICATION_CODE}#{part.Version}"
+      body = {
+        default_code: part.Number.to_s.strip,
+        part: odoo_part_number,
+        revision: part.Version,
+        name: part.Name,
+        part_type: part.PartType,
+        material: part.MATERIAL,
+        length: part.LENGTH,
+        height: part.HEIGHT,
+        breadth: part.WIDTH,
+        weight: part.MASS.present? ? part.MASS.to_s[0...-2].strip : "",
+        lifecycle_status: part.State,
+        manufacturer: part.MANUFACTURER,
+        manufacturer_ref: part.MANUFACTURER_REF,
+        name_a: part.NAME_A,
+        name_d: part.NAME_D,
+        name_f: part.NAME_F,
+        type: part.TYPE,
+        classification_code: part.CLASSIFICATION_CODE,
+        created_by_from_api: self.created_by,
+        updated_by_from_api: part.LastChangedBy
+      }
+      self.odoo_part_number = odoo_part_number
+      self.odoo_body = body
+    end
     validate_part
-    part = self.part_json.to_obj
-    odoo_part_number = "#{part.CLASSIFICATION_CODE}#{part.Version}"
-    body = {
-      default_code: part.Number.to_s.strip,
-      part: odoo_part_number,
-      revision: part.Version,
-      name: part.Name,
-      part_type: part.PartType,
-      material: part.MATERIAL,
-      length: part.LENGTH,
-      height: part.HEIGHT,
-      breadth: part.WIDTH,
-      weight: part.MASS.present? ? part.MASS.to_s[0...-2].strip : "",
-      lifecycle_status: part.State,
-      manufacturer: part.MANUFACTURER,
-      manufacturer_ref: part.MANUFACTURER_REF,
-      name_a: part.NAME_A,
-      name_d: part.NAME_D,
-      name_f: part.NAME_F,
-      type: part.TYPE,
-      classification_code: part.CLASSIFICATION_CODE,
-      created_by_from_api: self.created_by,
-      updated_by_from_api: part.LastChangedBy
-    }
-    self.odoo_part_number = odoo_part_number
-    self.odoo_body = body
   end
 
   def self.process_parts(xml_file)
@@ -128,5 +136,24 @@ class Part < ApplicationRecord
   def self.process_deleted_parts(parts)
     response = @odoo_service.delete_products(parts)
     Part.where(odoo_part_number: parts.map{|part| part["part"]}, part_type: "DeletedParts").update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "Delete Products") if response.present?
+  end
+
+  def process_part
+    if !self.error.present?
+      @setting = Setting.last
+      @odoo_service = OdooService.new(@setting, self.xml_file_id)
+      existing_products = @odoo_service.get_products([self.odoo_part_number])
+      existing_products.map { |product| product.default_code.to_s }
+      if self.odoo_type === "AddedParts" || !existing_products.include?(self.odoo_part_number)
+        response = @odoo_service.create_products([self.odoo_body])
+        self.update(status: AppConstants::FILE_STATUS[:success], processed_by: "Create products#{ 'by Update Products' if self.part_type != 'AddedParts'}", odoo_type: "Add") if response.present?
+      elsif ["ChangedParts", "UnchangedParts"].include?(self.part_type)
+        response = @odoo_service.update_products(parts_to_be_updated)
+        self.update(status: AppConstants::FILE_STATUS[:success], processed_by: "Update Products", odoo_type: "Update") if response.present?
+      else
+        response = @odoo_service.delete_products([self.odoo_part_number])
+        self.update(status: AppConstants::FILE_STATUS[:success], processed_by: "Delete Products", odoo_type: "Delete") if response.present?
+      end
+    end
   end
 end

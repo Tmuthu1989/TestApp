@@ -1,0 +1,12 @@
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <a class="nav-link <%= is_active?(xml_file_path(@xml_file))%>" id="xml_file_details-tab" href='<%= xml_file_path(@xml_file)%>' data-toggles="tab" data-targets="#xml_file_details" type="button" role="tab" aria-controls="home" aria-selected="true">XML File Content</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link <%= check_active('parts')%>" id="parts-tab"  href='<%= xml_file_parts_path(@xml_file)%>' data-toggles="tab" data-targets="#parts" type="button" role="tab" aria-controls="parts" aria-selected="false">Parts</a>
+  </li>
+
+  <li class="nav-item" role="presentation">
+    <a class="nav-link <%= check_active('bom_headers')%>" id="boms-tab"  href='<%= xml_file_bom_headers_path(@xml_file)%>' data-toggles="tab" data-targets="#boms" type="button" role="tab" aria-controls="boms" aria-selected="false">BOMs</a>
+  </li>
+</ul>

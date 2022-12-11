@@ -63,22 +63,30 @@ class Document < ApplicationRecord
           document_url: document.document_url,
           type: document.document_type
         }
+        odoo_docs = []
         document_ids << document.id
-        odoo_documents << odoo_document unless @existing_documents[document.document_number].present? && @existing_documents[document.document_number] === odoo_document[:document_url]
+        unless @existing_documents[document.document_number].present? && @existing_documents[document.document_number] === odoo_document[:document_url]
+          odoo_documents << odoo_document 
+          odoo_docs << odoo_document
+        end
         if @setting.documents_folder.present?
           Dir.glob("#{@setting.documents_folder}/#{document.part_number}*.dxf").each do |doc|
             odoo_document[:type] = "2d"
             odoo_document[:document_url] = odoo_document[:document_url].ext(".dxf")
-            odoo_documents << odoo_document unless @existing_documents[document.document_number].present? && @existing_documents[document.document_number] === odoo_document[:document_url]
-            File.rename(doc, @setting.documents_folder + "/" + document.odoo_part_number + File.extname(doc))
+            unless @existing_documents[document.document_number].present? && @existing_documents[document.document_number] === odoo_document[:document_url]
+              odoo_documents << odoo_document 
+              odoo_docs << odoo_document
+            end
+            File.rename(doc, doc.gsub(document.part_number, document.odoo_part_number))
           end
         end
+        document.odoo_body = { document_list: odoo_docs } if odoo_docs
         document.save
       end
     end
     if odoo_documents.present?
       result = @odoo_service.create_documents(odoo_documents)
-      xml_file.documents.where(id: document_ids).update_all(status: AppConstants::FILE_STATUS[:success]) if result.present? && document_ids.present?
+      xml_file.documents.where(id: document_ids).update_all(status: AppConstants::FILE_STATUS[:success], odoo_type: "Add") if result.present? && document_ids.present?
     end
   end
 
@@ -94,7 +102,7 @@ class Document < ApplicationRecord
     end
     if odoo_documents.present?
       result = @odoo_service.delete_documents(odoo_documents)
-      xml_file.documents.where(id: document_ids).update_all(status: AppConstants::FILE_STATUS[:success]) if result.present? && document_ids.present?
+      xml_file.documents.where(id: document_ids).update_all(status: AppConstants::FILE_STATUS[:success], odoo_type: "Delete") if result.present? && document_ids.present?
     end
   end
 
@@ -158,5 +166,22 @@ class Document < ApplicationRecord
     end
     document.document_type = document_type
     document
+  end
+
+  def self.upload_document(document_id, file_name)
+    document = Document.find_by(id: document_id)
+    begin
+      params = {
+        file: File.open(file_name)
+      }
+    rescue StandardError => e
+      error = {
+        error_type: "StandardError",
+        title: e,
+        message: e.message,
+        backtrace: e.backtrace
+      }
+      HttpRequest.create(error: error, xml_file_id: document.xml_file_id)
+    end
   end
 end
