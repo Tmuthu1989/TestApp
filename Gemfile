@@ -86,3 +86,4 @@ gem "jquery-rails"
 gem "kaminari"
 gem 'bootstrap4-kaminari-views'
 gem 'httparty'
+gem "image_processing", ">= 1.2"
