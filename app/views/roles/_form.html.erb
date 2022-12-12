@@ -1,0 +1,97 @@
+<%page_name "Roles"%>
+<div class="card card-info m-0">
+  <div class="card-body">
+    <%= form_with(model: @role) do |f|%>
+      <div class="row">
+        <% if @role.errors.any? %>
+          <div class="col-12">
+            <div class="alert alert-danger alert-dismissible fade show">
+              <h2><%= pluralize(@role.errors.count, "error") %> prohibited this role from being saved:</h2>
+
+              <ul>
+                <% @role.errors.each do |error| %>
+                  <li><%= error.full_message %></li>
+                <% end %>
+              </ul>
+            </div>
+            
+          </div>
+        <% end %>
+        <div class="col-12">
+          <%= link_to roles_path, class: "btn btn-sm btn-info  mb-3 float-right" do %>
+            <em class="fas fa-arrow-left"></em> Back
+          <%end%>
+          <h3><%= @role.new_record? ? "New Role" : "Edit Role"%></h3>
+        </div>
+        <div class="col-12 col-md-4 mb-2">
+          <div class="form-group">
+            <%= f.label :name, "Role"%>
+            <%= f.text_field :name, required: true, class: "form-control"%>
+          </div>
+        </div>
+        <div class="col-12 mb-2">
+          <h4>Permissions</h4>
+          <table class="table table-striped table-bordered">
+            <tr>
+              <th width="40%">Module</th>
+              <th width="20%" class="text-center">Read</th>
+              <th width="20%" class="text-center">Read & Write</th>
+              <th width="20%" class="text-center">No Access</th>
+            </tr>
+            <tr>
+              <th>Manage Roles</th>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :roles, 1%><span class="fa fa-circle"></span></label></td>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :roles, 2%><span class="fa fa-circle"></span></label></td>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :roles, 0%><span class="fa fa-circle"></span></label></td>
+            </tr>
+            <tr>
+              <th>Manage Users</th>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :user_management, 1%><span class="fa fa-circle"></span></label></td>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :user_management, 2%><span class="fa fa-circle"></span></label></td>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :user_management, 0%><span class="fa fa-circle"></span></label></td>
+            </tr>
+            <tr>
+              <th>Manage XML Files</th>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :xml_files, 1%><span class="fa fa-circle"></span></label></td>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :xml_files, 2%><span class="fa fa-circle"></span></label></td>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :xml_files, 0%><span class="fa fa-circle"></span></label></td>
+            </tr>
+            <tr>
+              <th>Manage Parts</th>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :parts, 1%><span class="fa fa-circle"></span></label></td>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :parts, 2%><span class="fa fa-circle"></span></label></td>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :parts, 0%><span class="fa fa-circle"></span></label></td>
+            </tr>
+            <tr>
+              <th>Manage BOMs</th>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :boms, 1%><span class="fa fa-circle"></span></label></td>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :boms, 2%><span class="fa fa-circle"></span></label></td>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :boms, 0%><span class="fa fa-circle"></span></label></td>
+            </tr>
+            <tr>
+              <th>Manage Documents</th>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :documents, 1%><span class="fa fa-circle"></span></label></td>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :documents, 2%><span class="fa fa-circle"></span></label></td>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :documents, 0%><span class="fa fa-circle"></span></label></td>
+            </tr>
+            <tr>
+              <th>Manage Document Uploads</th>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :document_uploads, 1%><span class="fa fa-circle"></span></label></td>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :document_uploads, 2%><span class="fa fa-circle"></span></label></td>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :document_uploads, 0%><span class="fa fa-circle"></span></label></td>
+            </tr>
+            <tr>
+              <th>Manage Settings</th>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :settings, 1%><span class="fa fa-circle"></span></label></td>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :settings, 2%><span class="fa fa-circle"></span></label></td>
+              <td class="text-center"><label class="c-radio"><%= f.radio_button :settings, 0%><span class="fa fa-circle"></span></label></td>
+            </tr>
+          </table>
+        </div>
+        <div class="col-12">
+          <%= f.submit "Save", class: "btn btn-success"%>
+        </div>
+      </div>
+    <% end -%>          
+  </div>
+</div>

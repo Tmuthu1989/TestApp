@@ -40,7 +40,7 @@
                           <td><%= document_upload.file_path%></td>
                           <td>
                             <%= render "common/status", status: document_upload.status%><% if document_upload.error.present?%><%= render "common/error", message: "#{document_upload.error.values.join(", ")}"%><%end%>
-                            <%if document_upload.pending?%>
+                            <%if policy(DocumentUpload).write? && document_upload.pending?%>
                               <%= link_to xml_file_document_upload_re_process_path(@xml_file, document_upload), class: "btn btn-success" do %>
                                 <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
                               <% end -%>

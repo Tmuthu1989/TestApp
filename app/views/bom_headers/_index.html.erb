@@ -48,7 +48,7 @@
                             <%= link_to [@xml_file, bom_header], class: "btn btn-info", remote: true do %>
                               <i class="fa fa-eye"></i>
                             <% end -%>
-                            <%if bom_header.pending?%>
+                            <%if policy(BomHeader).write? && bom_header.pending?%>
                               <%= link_to edit_xml_file_bom_header_path(@xml_file, bom_header), class: "btn btn-warning", remote: true do %>
                                 <i class="fa fa-edit"></i>
                               <% end -%>

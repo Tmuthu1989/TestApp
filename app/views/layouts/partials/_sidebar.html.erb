@@ -11,18 +11,29 @@
                   <div class="item user-block">
                      <!-- User picture-->
                      <div class="user-block-picture">
-                        <div class="user-block-status"><img class="img-thumbnail rounded-circle" src="/templates/admin/img/user/02.jpg" alt="Avatar" width="60" height="60">
+                        <div class="user-block-status"><img class="img-thumbnail rounded-circle" src="<%= asset_path("no-user.png")%>" alt="Avatar" width="60" height="60">
                            <div class="circle bg-success circle-lg"></div>
                         </div>
                      </div><!-- Name and Job-->
-                     <div class="user-block-info"><span class="user-block-name">Hello, Mike</span><span class="user-block-role">Designer</span></div>
+                     <div class="user-block-info"><span class="user-block-name"><%= current_user.full_name%></span><span class="user-block-role"><%= current_user.role.name%></span></div>
                   </div>
                </div>
             </li><!-- END user info-->
             <!-- Iterates over all sidebar items-->
             <li class="nav-heading "><span data-localize="sidebar.heading.HEADER">Menu Navigation</span></li>
-            <li class="<%= check_active('xml_files', true)%>"><a href="<%= xml_files_path %>" title="XML Files"><em class="fas fa-file"></em><span>XML Files</span></a></li>
-            <li class="<%= check_active(settings_path)%>"><a href="<%= settings_path %>" title="Settings"><em class="fas fa-cog"></em><span>Settings</span></a></li>
+            <li class="<%= check_active(root_path, true)%>"><a href="<%= root_path %>" title="Dashboard"><em class="icon-speedometer"></em><span>Dashboard</span></a></li>
+            <%if policy(XmlFile).read?%>
+               <li class="<%= check_active('xml_files')%>"><a href="<%= xml_files_path %>" title="XML Files"><em class="fas fa-file"></em><span>XML Files</span></a></li>
+            <%end%>
+            <%if policy(Setting).read?%>
+               <li class="<%= check_active(settings_path)%>"><a href="<%= settings_path %>" title="Settings"><em class="fas fa-cog"></em><span>Settings</span></a></li>
+            <%end%>
+            <%if policy(Role).read?%>
+               <li class="<%= check_active("roles")%>"><a href="<%= roles_path %>" title="Roles"><em class="fas fa-user-check"></em><span>Roles</span></a></li>
+            <%end%>
+            <%if policy(User).read?%>
+               <li class="<%= check_active("users")%>"><a href="<%= users_path %>" title="Users"><em class="fas fa-users"></em><span>Users</span></a></li>
+            <%end%>
          </ul><!-- END sidebar nav-->
       </nav>
    </div><!-- END Sidebar (left)-->

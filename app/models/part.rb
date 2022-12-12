@@ -1,5 +1,4 @@
 class Part < ApplicationRecord
-  paginates_per 10
   belongs_to :xml_file
   before_save :set_odo_body
   scope :inwork, -> {where(state: "INWORK")}

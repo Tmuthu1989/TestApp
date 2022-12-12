@@ -1,11 +1,19 @@
 Rails.application.routes.draw do
-  devise_for :users
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
-
-  # Defines the root path route ("/")
-  root "xml_files#index"
+  devise_for :users, controllers: { registrations: 'users' }
+  mount LetterOpenerWeb::Engine, at: "/mails" if Rails.env.development?
   get "/read_xml" => "application#read_xml"
   match "/settings" => "application#settings", via: [:get, :post]
+  devise_scope :user do
+    authenticated :user do
+      root to: 'dashboard#index'
+    end
+
+    unauthenticated do
+      root to: 'devise/sessions#new', as: :unauthenticated_root
+    end
+  end
+  resources :roles
+  resources :users
   resources :xml_files do
     get :read_xml_files, on: :collection 
     resources :parts do 

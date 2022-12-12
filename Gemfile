@@ -61,6 +61,7 @@ group :development do
   gem 'pry'
   gem 'pry-rails'
   gem 'pry-nav'
+  gem 'letter_opener_web', '~> 2.0'
   # Add speed badges [https://github.com/MiniProfiler/rack-mini-profiler]
   # gem "rack-mini-profiler"
 
@@ -87,3 +88,5 @@ gem "kaminari"
 gem 'bootstrap4-kaminari-views'
 gem 'httparty'
 gem "image_processing", ">= 1.2"
+gem 'pundit', '~> 1.1'
+gem "store_attribute", "~> 1.0"

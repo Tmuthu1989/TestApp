@@ -31,27 +31,29 @@
                   <thead>
                     <tr>
                       <th style="width: 15%;">Part Type</th>
-                      <th style="width: 15%;">Part Number</th>
-                      <th style="width: 15%;">Part Name</th>
+                      <th style="width: 15%;">Windhicll PartNumber</th>
                       <th style="width: 15%;">Odoo Part Number</th>
+                      <th style="width: 15%;">Part Name</th>
                       <th style="width: 15%;">Status</th>
                       <th style=""></th>
                     </tr>
                   </thead>
                   <tbody>
                     <%if @parts.present?%>
+                      <%setting = Setting.last%>
                       <%@parts.each do |part|%>
                         <tr>
                           <td><%= part.part_type%></td>
                           <td><%= part.part_number%></td>
-                          <td><%= part.part_name%></td>
                           <td><%= part.odoo_part_number%></td>
+                          <td><%= part.odoo_body[setting.part_name_language]%></td>
                           <td><%= render "common/status", status: part.status%><% if part.error.present?%><%= render "common/error", message: "#{part.error.keys.join(", ")} are required"%><%end%></td>
                           <td>
+
                             <%= link_to [@xml_file, part], class: "btn btn-info", remote: true do %>
                               <i class="fa fa-eye"></i>
                             <% end -%>
-                            <%if part.pending?%>
+                            <%if policy(Part).write? && part.pending?%>
                               <%= link_to edit_xml_file_part_path(@xml_file, part), class: "btn btn-warning", remote: true do %>
                                 <i class="fa fa-edit"></i>
                               <% end -%>

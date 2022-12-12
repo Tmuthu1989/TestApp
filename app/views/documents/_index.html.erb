@@ -50,7 +50,7 @@
                           <td><%= document.document_url%></td>
                           <td>
                             <%= render "common/status", status: document.status%><% if document.error.present?%><%= render "common/error", message: "#{document.error.keys.join(", ")} having error"%><%end%>
-                            <%if document.pending?%>
+                            <%if policy(Document).write? && document.pending?%>
                               <%= link_to xml_file_document_re_process_path(@xml_file, document), class: "btn btn-success" do %>
                                 <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
                               <% end -%>

@@ -149,6 +149,15 @@ GEM
       activerecord
       kaminari-core (= 1.2.2)
     kaminari-core (1.2.2)
+    launchy (2.5.0)
+      addressable (~> 2.7)
+    letter_opener (1.8.1)
+      launchy (>= 2.2, < 3)
+    letter_opener_web (2.0.0)
+      actionmailer (>= 5.2)
+      letter_opener (~> 1.7)
+      railties (>= 5.2)
+      rexml
     libv8 (3.16.14.19)
     libv8 (3.16.14.19-x86_64-linux)
     libv8-node (16.10.0.0)
@@ -204,6 +213,8 @@ GEM
     public_suffix (5.0.0)
     puma (5.6.5)
       nio4r (~> 2.0)
+    pundit (1.1.0)
+      activesupport (>= 3.0.0)
     racc (1.6.0)
     rack (2.2.4)
     rack-test (2.0.2)
@@ -272,6 +283,8 @@ GEM
       sprockets (>= 3.0.0)
     stimulus-rails (1.1.0)
       railties (>= 6.0.0)
+    store_attribute (1.0.2)
+      activerecord (>= 6.0)
     strscan (3.0.4)
     thor (1.2.1)
     tilt (2.0.11)
@@ -323,6 +336,7 @@ DEPENDENCIES
   jquery-rails
   json
   kaminari
+  letter_opener_web (~> 2.0)
   libv8 (~> 3.16.14.3)
   mini_racer
   pg
@@ -330,11 +344,13 @@ DEPENDENCIES
   pry-nav
   pry-rails
   puma (~> 5.0)
+  pundit (~> 1.1)
   rails (~> 7.0.4)
   selenium-webdriver
   sidekiq
   sprockets-rails
   stimulus-rails
+  store_attribute (~> 1.0)
   turbo-rails
   tzinfo-data
   wdm (>= 0.1.0)

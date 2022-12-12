@@ -25,7 +25,50 @@ Setting.create(
 		"obs_url" => "https://obs.eu-de.otc.t-systems.com:443/windchill-odoo-doc-test"
 	}
 )
+super_admin = Role.find_or_create_by(name: "Super Admin") do |t|
+	t.settings = Role::READ_AND_WRITE
+	t.xml_files = Role::READ_AND_WRITE
+	t.parts = Role::READ_AND_WRITE
+	t.boms = Role::READ_AND_WRITE
+	t.documents = Role::READ_AND_WRITE
+	t.document_uploads = Role::READ_AND_WRITE
+	t.user_management = Role::READ_AND_WRITE
+	t.roles = Role::READ_AND_WRITE
+end
+
+Role.find_or_create_by(name: "IT Admin") do |t|
+	t.settings = Role::READ_AND_WRITE
+	t.xml_files = Role::READ_AND_WRITE
+	t.parts = Role::READ_AND_WRITE
+	t.boms = Role::READ_AND_WRITE
+	t.documents = Role::READ_AND_WRITE
+	t.document_uploads = Role::READ_AND_WRITE
+	t.user_management = Role::READ_AND_WRITE
+	t.roles = Role::READ_AND_WRITE
+end
+
+Role.find_or_create_by(name: "Engineering Admin") do |t|
+	t.xml_files = Role::READ
+	t.parts = Role::READ_AND_WRITE
+	t.boms = Role::READ_AND_WRITE
+	t.documents = Role::READ_AND_WRITE
+	t.document_uploads = Role::READ_AND_WRITE
+end
+
+Role.find_or_create_by(name: "User") do |t|
+	t.settings = Role::READ
+	t.xml_files = Role::READ
+	t.parts = Role::READ
+	t.boms = Role::READ
+	t.documents = Role::READ
+	t.document_uploads = Role::READ
+	t.user_management = Role::READ
+end
+
 User.find_or_create_by(email: "admin@app.com") do |t|
+	t.first_name = "Jungo"
+	t.last_name = "Super Admin"
 	t.password = 'password'
 	t.password_confirmation = 'password'
+	t.role = super_admin
 end 

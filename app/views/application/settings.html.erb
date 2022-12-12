@@ -43,6 +43,16 @@
             </label>
 					</div>
 				</div>
+
+				<div class="col-12 col-sm-4 col-md-3 col-lg-2">
+					<div class="form-group">
+						<label for="">Part List Name Language<i class="fa fa-asterisk required"></i></label>
+						<div>
+							<label class="c-radio"><input id="inlineradio1" type="radio" name="setting[part_name_language]" value="name_a" <%= "checked" if @setting.part_name_language === "name_a"%>><span class="fa fa-circle"></span> English</label>
+							<label class="c-radio"><input id="inlineradio2" type="radio" name="setting[part_name_language]" value="name_d" <%= "checked" if @setting.part_name_language === "name_d"%>><span class="fa fa-circle"></span> German</label>
+						</div>
+					</div>
+				</div>
 			</div>
 			<div class="row">
 				<div class="col-12">

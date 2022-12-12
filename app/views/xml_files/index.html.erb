@@ -4,9 +4,11 @@
   <div class="card-body">
     <div class="row">
       <div class="col-12">
-        <%= link_to read_xml_files_xml_files_path, class: "btn btn-sm btn-primary  mb-3 float-right" do %>
-          <em class="fas fa-sync"></em> Sync XML Files
-        <%end%>
+        <%if policy(XmlFile).write?%>
+          <%= link_to read_xml_files_xml_files_path, class: "btn btn-sm btn-primary  mb-3 float-right" do %>
+            <em class="fas fa-sync"></em> Sync XML Files
+          <%end%>
+        <% end -%>
         <div id="xml_files">
           <table class="table table-bordered">
             <thead>

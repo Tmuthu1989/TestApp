@@ -12,9 +12,10 @@
 		<%= link_to xml_file, class: "btn btn-info" do %>
 			<i class="fas fa-eye"></i>
 		<%end%>
-		
-		<%= link_to xml_file, method: :delete, data: { confirm: "Are you sure you want to delete this file?"}, class: "btn btn-danger" do %>
-			<i class="fas fa-trash"></i>
-		<%end%>
+		<%if policy(XmlFile).write?%>
+			<%= link_to xml_file, method: :delete, data: { confirm: "Are you sure you want to delete this file?"}, class: "btn btn-danger" do %>
+				<i class="fas fa-trash"></i>
+			<%end%>
+		<% end -%>
 	</td>
 </tr>

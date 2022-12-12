@@ -21,6 +21,7 @@ class XmlFilesController < ApplicationController
 
   private
     def init_service!
+      authorize(XmlFile)
       @service = XmlFilesService.new(request, params, current_user)
     end
 end
