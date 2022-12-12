@@ -1,0 +1,69 @@
+
+<div class="row">
+  
+  <div class="col-12 mb-2">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <a class="nav-link <%= 'active' if params[:type].blank?%>" id="xml_file_details-tab" href='<%= xml_file_document_uploads_path(@xml_file)%>' data-toggles="tab" data-targets="#xml_file_details" type="button" role="tab" aria-controls="home" aria-selected="true">All Uploads</a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link <%= 'active' if params[:type] === 'false'%>" id="BOMHeaders-tab"  href='<%= xml_file_document_uploads_by_type_path(@xml_file, "false")%>' data-toggles="tab" data-targets="#BOMHeaders" type="button" role="tab" aria-controls="BOMHeaders" aria-selected="false">OBS Uploads</a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link <%= 'active' if params[:type] === 'true'%>" id="Documents-tab"  href='<%= xml_file_document_uploads_by_type_path(@xml_file, "true")%>' data-toggles="tab" data-targets="#BOMHeaders" type="button" role="tab" aria-controls="BOMHeaders" aria-selected="false">ODOO Uploads</a>
+      </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+      <div class="tab-pane fade show active">
+        <div class="row">
+          <div class="col-12 no-padding" style="width:90%; ">
+            <div class="row">
+              <div class="col-12" >
+                <%#= paginate @parts, theme: 'twitter-bootstrap-4', :pagination_class => "pagination justify-content-center" %>
+                <table class="table table-bordered table-striped mb-3">
+                  <thead>
+                    <tr>
+                      <th style="width: 10%;">Document Name</th>
+                      <th style="width: 10%;">Document Number</th>
+                      <th style="width: 10%;">File Name</th>
+                      <th style="width: 10%;">File Path</th>
+                      <th style="width: 10%;">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <%if @document_uploads.present?%>
+                      <%@document_uploads.each do |document_upload|%>
+                        <tr>
+                          <td><%= document_upload.document.number%></td>
+                          <td><%= document_upload.document_number%></td>
+                          <td><%= document_upload.file_name%></td>
+                          <td><%= document_upload.file_path%></td>
+                          <td>
+                            <%= render "common/status", status: document_upload.status%><% if document_upload.error.present?%><%= render "common/error", message: "#{document_upload.error.values.join(", ")}"%><%end%>
+                            <%if document_upload.pending?%>
+                              <%= link_to xml_file_document_upload_re_process_path(@xml_file, document_upload), class: "btn btn-success" do %>
+                                <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                              <% end -%>
+                            <%end%>
+                          </td>
+                        </tr>
+                      <%end%>
+                    <%else%>
+                      <tr>
+                        <td colspan="6" class="text-danger text-center"><h4>No Uploads Found!</h4></td>
+                      </tr>
+                    <% end -%>
+                    
+                  </tbody>
+                </table>
+                <%= paginate @document_uploads, theme: 'twitter-bootstrap-4', :pagination_class => "pagination justify-content-center" %>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</div>

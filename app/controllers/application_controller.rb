@@ -4,6 +4,9 @@ class ApplicationController < ActionController::Base
 
 	def settings
 		@setting = BaseService.new(request, params, current_user).settings
+		if request.post?
+			redirect_to settings_path, notice: "Settings updated successfully!"
+		end
 	end
 
 	private

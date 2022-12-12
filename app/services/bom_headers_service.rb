@@ -63,7 +63,7 @@ class BomHeadersService < BaseService
 		end
 
 		def get_bom_header
-			BomHeader.find_by(id: params[:id] || params[:bom_header_id])
+			BomHeader.find_by(id: params[:id] || params[:bom_header_id]) if params[:id] || params[:bom_header_id]
 		end
 
 		def bom_header_params

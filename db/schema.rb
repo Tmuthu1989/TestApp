@@ -74,11 +74,19 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_11_095127) do
 
   create_table "document_uploads", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "xml_file_id", null: false
+    t.uuid "document_id", null: false
     t.string "document_number"
+    t.string "number"
     t.string "part_number"
+    t.string "odoo_part_number"
+    t.string "file_name"
+    t.string "file_path"
+    t.string "status", default: "Pending"
     t.jsonb "error"
+    t.boolean "is_odoo_upload"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["document_id"], name: "index_document_uploads_on_document_id"
     t.index ["xml_file_id"], name: "index_document_uploads_on_xml_file_id"
   end
 
@@ -196,6 +204,7 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_11_095127) do
   add_foreign_key "bom_components", "bom_headers"
   add_foreign_key "bom_components", "xml_files"
   add_foreign_key "bom_headers", "xml_files"
+  add_foreign_key "document_uploads", "documents"
   add_foreign_key "document_uploads", "xml_files"
   add_foreign_key "documents", "xml_files"
   add_foreign_key "http_requests", "xml_files"

@@ -253,7 +253,7 @@ class OdooService
 			resp = HttpService.new(api_url).post(body, cookie)
 			res_body = resp.body.present? ? JSON.parse(resp.body) : {}
 			response = resp.to_obj
-			if (response.error.present? && response.error.data.name === "builtins.KeyError") || (response.result.present? && response.result.status == "error" && response.result.message.include?("Access Token"))
+			if (response.result.present? && response.result.status == "error" && response.result.message.include?("Access Token"))
 				retries += 1
 				get_access_token
 				raise
@@ -278,5 +278,51 @@ class OdooService
 		HttpRequest.create(req_body: body, request_type: @request_type, res_body: res_body, error: error, xml_file_id: xml_file_id, req_url: api_url)	
 		[response, error[:message]]
 	end
+
+	def obs_upload(params)
+    response = HttpService.new(api_config.obs_url).post_multi_part(params)
+    error = {}
+    result = nil
+
+    if response["Error"].present?
+      error = {
+        error_type: "OBS Bucket Error",
+        title: response["Error"]["Code"],
+        message: response["Error"]["Message"],
+        bucket_name: response["Error"]["BucketName"]
+      }
+    else
+    	result = response
+    end
+    HttpRequest.create(req_body: params, request_type: "OBS File Upload", res_body: response, error: error, xml_file_id: xml_file_id, req_url: api_config.obs_url)	
+    [result, error]
+  end
+
+  def odoo_upload(params)
+  	api_url = "#{base_url}#{api_config.document_upload}"
+    error = {}
+    result = false
+    retries = 0
+    if api_config.document_upload.present?
+    	begin
+	    	response = HttpService.new(api_url).post_multi_part(params)
+		    result = response
+			rescue StandardError => e
+				Rails.logger.error e
+				if retries == 1
+					retry
+				else
+					error = {
+						error_type: "StandardError",
+						title: e,
+						message: e.message,
+						backtrace: e.backtrace
+					}
+				end
+			end
+	    HttpRequest.create(req_body: params, request_type: "Odoo File Upload", res_body: response, error: error, xml_file_id: xml_file_id, req_url: api_url)	
+	  end
+    [result, error]
+  end
 	
 end

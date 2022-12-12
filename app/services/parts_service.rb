@@ -53,7 +53,7 @@ class PartsService < BaseService
 		end
 
 		def get_part
-			Part.find_by(id: params[:id] || params[:part_id])
+			Part.find_by(id: params[:id] || params[:part_id]) if params[:id] || params[:part_id]
 		end
 
 		def part_params

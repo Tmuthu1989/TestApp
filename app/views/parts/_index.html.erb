@@ -19,7 +19,6 @@
       <li class="nav-item" role="presentation">
         <a class="nav-link <%= 'active' if params[:type] === 'DeletedParts'%>" id="parts-tab"  href='<%= xml_file_parts_by_type_path(@xml_file, "DeletedParts")%>' data-toggles="tab" data-targets="#parts" type="button" role="tab" aria-controls="parts" aria-selected="false">Deleted Parts</a>
       </li>
-      </li>
     </ul>
     <div class="tab-content" id="myTabContent">
       <div class="tab-pane fade show active">
@@ -47,7 +46,7 @@
                           <td><%= part.part_number%></td>
                           <td><%= part.part_name%></td>
                           <td><%= part.odoo_part_number%></td>
-                          <td><%= render "common/status", status: part.status%><% if part.error.present?%><%= render "common/error", message: "#{obj.error.keys.join(", ")} are required"%><%end%></td>
+                          <td><%= render "common/status", status: part.status%><% if part.error.present?%><%= render "common/error", message: "#{part.error.keys.join(", ")} are required"%><%end%></td>
                           <td>
                             <%= link_to [@xml_file, part], class: "btn btn-info", remote: true do %>
                               <i class="fa fa-eye"></i>

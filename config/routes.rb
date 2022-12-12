@@ -18,8 +18,11 @@ Rails.application.routes.draw do
     end
     resources :bom_components
     resources :documents
+    resources :document_uploads
     get "/parts/view/:type" => "parts#index", as: :parts_by_type
     get "/bom_headers/view/:type" => "bom_headers#index", as: :bom_headers_by_type
+    get "/documents/view/:type" => "documents#index", as: :documents_by_type
+    get "/document_uploads/view/:type" => "document_uploads#index", as: :document_uploads_by_type
     get "/view/:type" => "xml_files#show", as: :xml_contents
   end
 end

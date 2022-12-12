@@ -21,3 +21,8 @@ module Testapp
     # config.active_job.queue_adapter = :sidekiq
   end
 end
+class String
+  def true?
+    self === "true"
+  end
+end

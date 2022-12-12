@@ -158,6 +158,12 @@
 																	<%= field.text_field :document_delete, value: @setting.api_config["document_delete"], class: "form-control"%>
 																</div>
 															</div>
+															<div class="col-12 col-md-6 col-lg-6">
+																<div class="form-group">
+																	<label for="">Document Upload URL (<small>Ex: https://www.example.com</small>) <i class="fas fa-asterisk required"></i></label>
+																	<%= field.text_field :document_upload, value: @setting.api_config["document_upload"], class: "form-control"%>
+																</div>
+															</div>
 														</div>
 													</div>
 												</div>

@@ -1,0 +1,80 @@
+
+<div class="row">
+  
+  <div class="col-12 mb-2">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <a class="nav-link <%= 'active' if params[:type].blank?%>" id="xml_file_details-tab" href='<%= xml_file_documents_path(@xml_file)%>' data-toggles="tab" data-targets="#xml_file_details" type="button" role="tab" aria-controls="home" aria-selected="true">All Documents</a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link <%= 'active' if params[:type] === 'AddedDocuments'%>" id="BOMHeaders-tab"  href='<%= xml_file_documents_by_type_path(@xml_file, "AddedDocuments")%>' data-toggles="tab" data-targets="#BOMHeaders" type="button" role="tab" aria-controls="BOMHeaders" aria-selected="false">Added Documents</a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link <%= 'active' if params[:type] === 'ChangedDocuments'%>" id="Documents-tab"  href='<%= xml_file_documents_by_type_path(@xml_file, "ChangedDocuments")%>' data-toggles="tab" data-targets="#BOMHeaders" type="button" role="tab" aria-controls="BOMHeaders" aria-selected="false">Changed Documents</a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link <%= 'active' if params[:type] === 'UnchangedDocuments'%>" id="BOMHeaders-tab"  href='<%= xml_file_documents_by_type_path(@xml_file, "UnchangedDocuments")%>' data-toggles="tab" data-targets="#BOMHeaders" type="button" role="tab" aria-controls="BOMHeaders" aria-selected="false">Unchanged Documents</a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="nav-link <%= 'active' if params[:type] === 'DeletedDocuments'%>" id="BOMHeaders-tab"  href='<%= xml_file_documents_by_type_path(@xml_file, "DeletedDocuments")%>' data-toggles="tab" data-targets="#parts" type="button" role="tab" aria-controls="parts" aria-selected="false">Deleted Documents</a>
+      </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+      <div class="tab-pane fade show active">
+        <div class="row">
+          <div class="col-12 no-padding" style="width:90%; ">
+            <div class="row">
+              <div class="col-12" >
+                <%#= paginate @parts, theme: 'twitter-bootstrap-4', :pagination_class => "pagination justify-content-center" %>
+                <table class="table table-bordered table-striped mb-3">
+                  <thead>
+                    <tr>
+                      <th style="width: 10%;">Document Type</th>
+                      <th style="width: 10%;">Name</th>
+                      <th style="width: 10%;">Number</th>
+                      <th style="width: 10%;">Document Number</th>
+                      <th style="width: 10%;">Odoo Part Number</th>
+                      <th style="width: 20%;">Document URL</th>
+                      <th style="width: 10%;">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <%if @documents.present?%>
+                      <%@documents.each do |document|%>
+                        <tr>
+                          <td><%= document.doc_type%></td>
+                          <td><%= document.name%></td>
+                          <td><%= document.number%></td>
+                          <td><%= document.document_number%></td>
+                          <td><%= document.odoo_part_number%></td>
+                          <td><%= document.document_url%></td>
+                          <td>
+                            <%= render "common/status", status: document.status%><% if document.error.present?%><%= render "common/error", message: "#{document.error.keys.join(", ")} having error"%><%end%>
+                            <%if document.pending?%>
+                              <%= link_to xml_file_document_re_process_path(@xml_file, document), class: "btn btn-success" do %>
+                                <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                              <% end -%>
+                            <%end%>
+                              
+                          </td>
+                        </tr>
+                      <%end%>
+                    <%else%>
+                      <tr>
+                        <td colspan="6" class="text-danger text-center"><h4>No Documents Found!</h4></td>
+                      </tr>
+                    <% end -%>
+                    
+                  </tbody>
+                </table>
+                <%= paginate @documents, theme: 'twitter-bootstrap-4', :pagination_class => "pagination justify-content-center" %>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</div>

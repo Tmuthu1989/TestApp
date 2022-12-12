@@ -9,4 +9,10 @@
   <li class="nav-item" role="presentation">
     <a class="nav-link <%= check_active('bom_headers')%>" id="boms-tab"  href='<%= xml_file_bom_headers_path(@xml_file)%>' data-toggles="tab" data-targets="#boms" type="button" role="tab" aria-controls="boms" aria-selected="false">BOMs</a>
   </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link <%= check_active('documents')%>" id="boms-tab"  href='<%= xml_file_documents_path(@xml_file)%>' data-toggles="tab" data-targets="#boms" type="button" role="tab" aria-controls="boms" aria-selected="false">Documents</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link <%= check_active('document_uploads')%>" id="boms-tab"  href='<%= xml_file_document_uploads_path(@xml_file)%>' data-toggles="tab" data-targets="#boms" type="button" role="tab" aria-controls="boms" aria-selected="false">Document Uploads</a>
+  </li>
 </ul>

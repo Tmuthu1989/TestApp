@@ -4,6 +4,7 @@ class XmlFile < ApplicationRecord
 	has_many :bom_headers, dependent: :destroy
 	has_many :bom_components, dependent: :destroy
 	has_many :documents, dependent: :destroy
+	has_many :document_uploads, dependent: :destroy
 	after_create :update_json_content
 
 	scope :pending, -> {where.not(status: AppConstants::FILE_STATUS[:success])}
