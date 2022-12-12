@@ -19,7 +19,7 @@ class XmlFilesService < BaseService
 					end
 				end
 			end
-			ProcessXmlFilesJob.perform_later
+			ProcessXmlFilesJob.set(wait: 2.seconds).perform_later
 		end
 	end
 

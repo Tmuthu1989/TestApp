@@ -10,7 +10,7 @@ class Document < ApplicationRecord
   scope :unchanged, -> {where(doc_type: "UnchangedDocuments")}
   scope :deleted, -> {where(doc_type: ["DeletedDocuments", "DeletedDocumentLinks"])}
 
-  def self.deleted?
+  def deleted?
     ["DeletedDocuments", "DeletedDocumentLinks"].include?(doc_type)
   end
 
@@ -216,9 +216,10 @@ class Document < ApplicationRecord
       doc_error = document.error
       doc_error["document_uploads"] ||= {}
       error = {}
-      status = document.status
+      document_status = document.status
       file_name = File.basename(file)
       document_upload = document.document_uploads.find_or_create_by(xml_file_id: document.xml_file_id, file_name: file_name, is_odoo_upload: is_odoo_upload, file_path: file)
+      status = document_upload.status
       begin
         @setting ||= Setting.last
         @odoo_service ||= OdooService.new(@setting, document.xml_file_id)
@@ -228,6 +229,7 @@ class Document < ApplicationRecord
         }
         response, error = is_odoo_upload ? @odoo_service.odoo_upload(params) : @odoo_service.obs_upload(params)
         doc_error["document_uploads"][file_name] = "#{file_name} upload failed due to #{error[:message]} from server" if error.present?
+        document_status = status = error.present? ? AppConstants::FILE_STATUS[:failed] : AppConstants::FILE_STATUS[:success]
       rescue StandardError => e
         error = {
           error_type: "StandardError",
@@ -238,9 +240,9 @@ class Document < ApplicationRecord
         
         doc_error["document_uploads"][file_name] = "#{file_name} upload failed due to #{e.message}"
         HttpRequest.create(error: error, xml_file_id: document.xml_file_id)
-        status = AppConstants::FILE_STATUS[:failed]
+        document_status = status = AppConstants::FILE_STATUS[:failed]
       end
-      document.update(error: doc_error)
+      document.update(error: doc_error, status: document_status) unless is_odoo_upload
       document_upload.update(file_name: file_name, document_number: document.document_number, number: document.number, part_number: document.name, odoo_part_number: document.odoo_part_number, status: status, error: error, xml_file_id: document.xml_file_id)
 
     end

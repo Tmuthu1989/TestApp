@@ -25,7 +25,7 @@ class DocumentUploadsService < BaseService
 	end
 
 	def re_process
-		DocumentUpload.upload_document(@document_upload.document_id, @document_upload.is_odoo_upload)
+		Document.upload_document(@document_upload.document_id, @document_upload.file_path, @document_upload.is_odoo_upload)
 		@document_upload
 	end
 

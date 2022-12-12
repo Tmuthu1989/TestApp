@@ -17,8 +17,12 @@ Rails.application.routes.draw do
       get :req_body
     end
     resources :bom_components
-    resources :documents
-    resources :document_uploads
+    resources :documents do 
+      get :re_process
+    end
+    resources :document_uploads do 
+      get :re_process
+    end
     get "/parts/view/:type" => "parts#index", as: :parts_by_type
     get "/bom_headers/view/:type" => "bom_headers#index", as: :bom_headers_by_type
     get "/documents/view/:type" => "documents#index", as: :documents_by_type
