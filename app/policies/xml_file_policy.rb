@@ -34,6 +34,10 @@ class XmlFilePolicy < ApplicationPolicy
     can_write?(role)
   end
 
+  def read_xml_files?
+    can_write?(role)
+  end
+
   def role
     user&.role&.xml_files
   end
