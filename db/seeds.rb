@@ -68,7 +68,7 @@ end
 User.find_or_create_by(email: "admin@app.com") do |t|
 	t.first_name = "Jungo"
 	t.last_name = "Super Admin"
-	t.password = 'password'
-	t.password_confirmation = 'password'
+	t.password = 'Password1!'
+	t.password_confirmation = 'Password1!'
 	t.role = super_admin
 end 
