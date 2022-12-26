@@ -17,6 +17,14 @@ class ApplicationController < ActionController::Base
 		end
 	end
 
+	def request_logs
+		@logs = BaseService.new(request, params, current_user).logs
+	end
+
+	def view_log_detail
+		@log = BaseService.new(request, params, current_user).view_log_detail
+	end
+
   protected
 
   def configure_permitted_parameters

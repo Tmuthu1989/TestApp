@@ -6,7 +6,7 @@
 		<%= xml_file.file_path%>
 	</td>
 	<td>
-		<%= xml_file.status%>
+		<%= render "common/status", status: xml_file.status%>
 	</td>
 	<td>
 		<%= link_to xml_file, class: "btn btn-info" do %>

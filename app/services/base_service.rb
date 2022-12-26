@@ -14,6 +14,14 @@ class BaseService
     setting
   end
 
+  def logs
+    HttpRequest.all.page(params[:page]).order(created_at: :desc)
+  end
+
+  def view_log_detail
+    HttpRequest.find_by(id: params[:request_id])
+  end
+
   def get_layout
     if current_user.present?
       'admin'

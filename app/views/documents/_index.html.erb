@@ -30,12 +30,12 @@
                   <thead>
                     <tr>
                       <th style="width: 10%;">Document Type</th>
-                      <th style="width: 10%;">Name</th>
+                      <th style="width: 5%;">Name</th>
                       <th style="width: 10%;">Number</th>
                       <th style="width: 10%;">Document Number</th>
                       <th style="width: 10%;">Odoo Part Number</th>
                       <th style="width: 20%;">Document URL</th>
-                      <th style="width: 10%;">Status</th>
+                      <th style="width: 15%;">Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -49,12 +49,15 @@
                           <td><%= document.odoo_part_number%></td>
                           <td><%= document.document_url%></td>
                           <td>
-                            <%= render "common/status", status: document.status%><% if document.error.present?%><%= render "common/error", message: "#{document.error.keys.join(", ")} having error"%><%end%>
+                            <%= render "common/status", status: document.status%><% if document.error.present?%><%= render "common/error", message: "#{document.error["message"]}"%><%end%>
                             <%if policy(Document).write? && document.pending?%>
                               <%= link_to xml_file_document_re_process_path(@xml_file, document), class: "btn btn-success" do %>
                                 <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
                               <% end -%>
                             <%end%>
+                            <%= link_to xml_file_document_req_body_path(@xml_file, document), class: "btn btn-secondary", remote: true do %>
+                              <i class="fas fa-code" aria-hidden="true"></i>
+                            <% end -%>
                               
                           </td>
                         </tr>

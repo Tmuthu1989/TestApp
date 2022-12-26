@@ -34,6 +34,10 @@
             <%if policy(User).read?%>
                <li class="<%= check_active("users")%>"><a href="<%= users_path %>" title="Users"><em class="fas fa-users"></em><span>Users</span></a></li>
             <%end%>
+            <%if policy(XmlFile).read?%>
+               <li class="<%= check_active("users")%>"><a href="<%= users_path %>" title="Users"><em class="fas fa-users"></em><span>Request Logs</span></a></li>
+            <% end -%>
+
          </ul><!-- END sidebar nav-->
       </nav>
    </div><!-- END Sidebar (left)-->

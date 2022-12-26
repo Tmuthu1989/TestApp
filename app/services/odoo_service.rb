@@ -72,7 +72,7 @@ class OdooService
 		error = {}
 		@request_type = from_update ? "Update Parts" : "Create Parts"
 		url = from_update ? api_config.product_update : api_config.product_creation
-		odoo_request(url, body, setting.cookie)[0]
+		odoo_request(url, body, setting.cookie)
 	end
 
 	def update_products(products)
@@ -92,7 +92,7 @@ class OdooService
 		result = nil
 		error = {}
 		@request_type = "Delete Parts"
-		odoo_request(api_config.product_delete, body, setting.cookie)[0]
+		odoo_request(api_config.product_delete, body, setting.cookie)
 	end
 
 	def search_boms(components=[])
@@ -215,7 +215,7 @@ class OdooService
 		result = nil
 		error = {}
 		@request_type = "Create Documents"
-		odoo_request(api_config.document_create, body, setting.cookie)[0]
+		odoo_request(api_config.document_create, body, setting.cookie)
 	end
 
 	def delete_documents(documents)

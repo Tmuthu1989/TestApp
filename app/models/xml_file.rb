@@ -33,10 +33,9 @@ class XmlFile < ApplicationRecord
 	    parts = xml_file.parts
 	    success_parts_count = parts.success.count
 	    bom_components = xml_file.bom_components
-	    success_bom_component_count = bom_components.success.count
 	    documents = xml_file.documents
 	    success_documents_count = documents.success.count
-			xml_file.update(status: AppConstants::FILE_STATUS[:success]) if parts.count === success_parts_count && bom_components.count === success_bom_component_count  && documents.count === success_documents_count
+			xml_file.update(status: AppConstants::FILE_STATUS[:success]) if parts.count === success_parts_count && documents.count === success_documents_count
 			@success_count += 1
 			ActionCable.server.broadcast "process_xml_files:#{User.first.id}", {message: "<b>#{@success_count}/#{@total_count}</b> files are processed!"}
 		rescue StandardError => e

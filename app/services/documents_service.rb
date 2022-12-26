@@ -37,6 +37,19 @@ class DocumentsService < BaseService
 		@document.destroy
 	end
 
+	def req_body
+		@setting = Setting.last
+		@body = {"access_token": @setting.access_token }
+		if document.document_type != "Delete"
+			@body["document_list"] = document.odoo_body["document_list"]
+		else
+			@body["delete_list"] = [{part_no: document.odoo_part_number}]
+		end
+		[document, {
+					"params": @body
+				}.to_json]
+	end
+
 	private
 
 		def condition

@@ -131,6 +131,7 @@ class BomHeader < ApplicationRecord
 			}
 			bom_header_ids = []
 			added_bom_header_ids = []
+			error_comp_ids = []
 			bom_component_ids = []
 			added_component_ids = []
 			bom_headers.each do |bom_header|
@@ -147,7 +148,9 @@ class BomHeader < ApplicationRecord
 						deleted_components.each do |comp|
 							err[comp.odoo_part_number] = delele_result[1]
 						end
+						err["message"] = "#{err.keys} having the following error: #{delele_result[1]}"
 						bom_header.update(error: err)
+						error_comp_ids << bom_header.id
 					else
 						deleted_components.update_all(status: AppConstants::FILE_STATUS[:success])
 					end
@@ -188,12 +191,14 @@ class BomHeader < ApplicationRecord
 			end
 			if create_boms.present?
 				add_result = @odoo_service.create_boms(create_boms)
+				added_bom_header_ids = added_bom_header_ids - error_comp_ids
 				BomHeader.where(id: added_bom_header_ids.uniq).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "Added by UpdateBOMs", odoo_type: "Add") if add_result && added_bom_header_ids.present?
 				BomComponent.where(id: added_component_ids).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "Added from UpdateBOMComponents", odoo_type: "Add") if add_result && added_component_ids.present?
 			end
 
 			if update_boms.present?
 				update_result = @odoo_service.update_boms(update_boms)
+				bom_header_ids = bom_header_ids - error_comp_ids
 				BomHeader.where(id: bom_header_ids.uniq).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "UpdateBOMs", odoo_type: "Update") if update_result && bom_header_ids.present?
 				BomComponent.where(id: bom_component_ids).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "UpdateBOMComponents", odoo_type: "Update") if update_result && bom_component_ids.present?
 			end

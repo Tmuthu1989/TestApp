@@ -69,16 +69,18 @@ class Document < ApplicationRecord
     document = get_document_type(document)
     document = generate_part_number(document)
     document, document_url, new_file_name, old_file_name = generate_url(document, document.number)
+    odoo_document = {
+      part_no: document.odoo_part_number,
+      document_number: document.document_number,
+      document_url: document.document_url,
+      type: document.document_type
+    }
+    odoo_docs = []
     if document.odoo_part_number.present? && document.document_url.present? && document.document_number.present? && document.document_type.present?
-      odoo_document = {
-        part_no: document.odoo_part_number,
-        document_number: document.document_number,
-        document_url: document.document_url,
-        type: document.document_type
-      }
-      odoo_docs = []
       @document_ids << document.id
-      unless @existing_documents[document.document_number].present? && @existing_documents[document.document_number] === odoo_document[:document_url]
+      if @existing_documents[document.document_number].present? && @existing_documents[document.document_number] === odoo_document[:document_url]
+        document.status = AppConstants::FILE_STATUS[:success]
+      else
         @odoo_documents << odoo_document 
         odoo_docs << odoo_document
       end
@@ -100,12 +102,20 @@ class Document < ApplicationRecord
           ProcessDocumentUploadJob.perform_later(document.id, new_file_name)
         end
       end
-      document.odoo_body = { document_list: odoo_docs } if odoo_docs
-      document.save
+    else
+      error = []
+      error << "odoo part number" if document.odoo_part_number.blank?
+      error << "document url" if document.document_url
+      error << "document number" if document.document_number
+      error << "document type" if document.document_type
+      document.error = {message: "#{error.join(",")} are missing"}
+
     end
+    document.odoo_body = { document_list: odoo_docs } if odoo_docs
+    document.save
     if process_to_odoo && @odoo_documents.present?
-      result = @odoo_service.create_documents(@odoo_documents)
-      document.update(status: AppConstants::FILE_STATUS[:success], odoo_type: "Add") if result.present? && @document_ids.present?
+      result, error = @odoo_service.create_documents(@odoo_documents)
+      document.update(status: AppConstants::FILE_STATUS[:success], odoo_type: "Add") if result.present? && @document_ids.present? && !error.present?
     end
     @odoo_documents
   end
@@ -117,8 +127,8 @@ class Document < ApplicationRecord
       process_create_document(xml_file, document)
     end
     if @odoo_documents.present?
-      result = @odoo_service.create_documents(@odoo_documents)
-      xml_file.documents.where(id: @document_ids).update_all(status: AppConstants::FILE_STATUS[:success], odoo_type: "Add") if result.present? && @document_ids.present?
+      result, error = @odoo_service.create_documents(@odoo_documents)
+      xml_file.documents.where(id: @document_ids).update_all(status: AppConstants::FILE_STATUS[:success], odoo_type: "Add") if result.present? && @document_ids.present? && !error.present?
     end
   end
 

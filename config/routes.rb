@@ -27,6 +27,8 @@ Rails.application.routes.draw do
     resources :bom_components
     resources :documents do 
       get :re_process
+      get :req_body
+      
     end
     resources :document_uploads do 
       get :re_process

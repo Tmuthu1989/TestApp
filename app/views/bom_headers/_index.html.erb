@@ -43,7 +43,7 @@
                           <td><%= bom_header.bom_type%></td>
                           <td><%= bom_header.number%></td>
                           <td><%= bom_header.odoo_part_number%></td>
-                          <td><%= render "common/status", status: bom_header.status%><% if bom_header.error.present?%><%= render "common/error", message: "#{bom_header.error.keys.join(", ")} components having error"%><%end%></td>
+                          <td><%= render "common/status", status: bom_header.status%><% if bom_header.error.present?%><%= render "common/error", message: "#{bom_header.error["message"]} components having error"%><%end%></td>
                           <td>
                             <%= link_to [@xml_file, bom_header], class: "btn btn-info", remote: true do %>
                               <i class="fa fa-eye"></i>
