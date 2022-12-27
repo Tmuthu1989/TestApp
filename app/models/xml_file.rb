@@ -20,9 +20,9 @@ class XmlFile < ApplicationRecord
 	end
 
 	def self.process_xml(id)
+		xml_file = XmlFile.find_by(id: id)
 		begin
 			
-			xml_file = XmlFile.find_by(id: id)
 			Part.load_parts(xml_file)
 			BomHeader.load_bom_headers(xml_file)
 			BomComponent.load_bom_components(xml_file)
@@ -31,13 +31,18 @@ class XmlFile < ApplicationRecord
 	    BomHeader.process_boms(xml_file)
 	    Document.process_documents(xml_file)
 	    parts = xml_file.parts
+	    bom_headers = xml_file.bom_headers
 	    success_parts_count = parts.success.count
 	    bom_components = xml_file.bom_components
 	    documents = xml_file.documents
 	    success_documents_count = documents.success.count
-			xml_file.update(status: AppConstants::FILE_STATUS[:success]) if parts.count === success_parts_count && documents.count === success_documents_count
+			if parts.count === success_parts_count && documents.count === success_documents_count && bom_headers.count === bom_headers.success.count
+				xml_file.update(status: AppConstants::FILE_STATUS[:success]) 
+			else
+				xml_file.update(status: AppConstants::FILE_STATUS[:failed], file_error: "This file having some problem") 
+			end
 			@success_count += 1
-			ActionCable.server.broadcast "process_xml_files:#{User.first.id}", {message: "<b>#{@success_count}/#{@total_count}</b> files are processed!"}
+			CommonUtils.broadcast_message("process_xml_files:", User.pluck(:id), "<b>#{@success_count}/#{@total_count}</b> files are processed!")
 		rescue StandardError => e
 			error = {
         error_type: "StandardError",
@@ -45,6 +50,7 @@ class XmlFile < ApplicationRecord
         message: e.message,
         backtrace: e.backtrace
       }
+      xml_file.update(file_error: e.message, status: AppConstants::FILE_STATUS[:failed])
       HttpRequest.create(error: error, xml_file_id: id)
 		end
 	end
@@ -53,9 +59,12 @@ class XmlFile < ApplicationRecord
 		xml_files = XmlFile.pending.pluck(:id)
 		@total_count = xml_files.count
 		@success_count = 0
-		ActionCable.server.broadcast "process_xml_files:#{User.first.id}", {message: "Started processing for #{xml_files.count} files!"}
-		xml_files.each do |id|
-			process_file(id)
+		users = User.all
+		CommonUtils.broadcast_message("process_xml_files:", users.pluck(:id), "Started processing for #{xml_files.count} files!")
+		xml_files.each_with_index do |id, i|
+			# process_file(id)
+			CommonUtils.broadcast_message("process_xml_files:", users.pluck(:id), "<b>#{i+1}/#{xml_files.count}</b> files processing!")
+			process_xml(id)
 		end		
 	end
 

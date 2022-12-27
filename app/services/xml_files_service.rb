@@ -8,9 +8,15 @@ class XmlFilesService < BaseService
 	def read_xml_files
 		if setting.xml_files_path
 			existing_files = XmlFile.pluck(:file_name)
-			Dir.glob("#{setting.xml_files_path}/*.xml").each do |file_path|
+			new_files = Dir.glob("#{setting.xml_files_path}/*.xml").select { |file|
+				file_name = File.basename(file)
+				!existing_files.include?(file_name)
+			}
+			i = 0
+			new_files.each do |file_path|
 				file_name = File.basename(file_path)
 				unless existing_files.include?(file_name)
+					CommonUtils.broadcast_message("process_xml_files:", User.pluck(:id), "<b>#{@success_count}/#{@total_count}</b> files are processed!")
 					begin
 						file_content = File.read(file_path)
 						XmlFile.create(file_name: file_name, file_path: file_path, file_content: file_content, date: Date.today.strftime("%d-%m-%Y"), status: AppConstants::FILE_STATUS[:pending])
