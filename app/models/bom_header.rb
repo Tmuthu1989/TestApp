@@ -41,9 +41,9 @@ class BomHeader < ApplicationRecord
 			added_bom_headers = xml_file.bom_headers.pending.added.includes(:bom_components)
 			changed_bom_headers = xml_file.bom_headers.pending.includes(:bom_components).where(bom_type: ["ChangedBOMs", "UnchangedBOMs"])
 			deleted_boms = xml_file.bom_headers.deleted
-			process_added_boms(added_bom_headers)		
-			process_updated_boms(changed_bom_headers)		
-			process_deleted_boms(deleted_boms)
+			process_added_boms(xml_file.id, added_bom_headers)		
+			process_updated_boms(xml_file.id, changed_bom_headers)		
+			process_deleted_boms(xml_file.id, deleted_boms)
 		rescue StandardError => e
       error = {
         error_type: "StandardError",
@@ -60,15 +60,15 @@ class BomHeader < ApplicationRecord
 		error = {}
 		@odoo_service = OdooService.new(@setting, bom_header.xml_file_id)
 		if bom_header.bom_type == "AddedBOMs"
-			result = BomHeader.process_added_boms([bom_header])
+			result = BomHeader.process_added_boms(bom_header.xml_file_id, [bom_header])
 		elsif bom_header.bom_type != "DeletedBOMs"
-			added_result, result = BomHeader.process_updated_boms([bom_header])
+			added_result, result = BomHeader.process_updated_boms(bom_header.xml_file_id, [bom_header])
 		else
-			result = BomHeader.process_deleted_boms([bom_header])
+			result = BomHeader.process_deleted_boms(bom_header.xml_file_id, [bom_header])
 		end
 	end
 
-	def self.process_added_boms(bom_headers)
+	def self.process_added_boms(xml_file_id, bom_headers)
 		boms = []
 		if bom_headers.present?
 			bom_component_ids = []
@@ -108,8 +108,9 @@ class BomHeader < ApplicationRecord
 				}
 				bom_header_ids << bom_header.id
 			end
-			result = @odoo_service.create_boms(boms)
+			result, error = @odoo_service.create_boms(boms)
 			if result.present?
+				bom_header_ids, bom_component_ids, del_bom_component_ids = self.update_error_list(xml_file_id, [bom_header_ids, bom_component_ids, del_bom_component_ids], result, ["AddedBOMs", "AddedBOMComponents", "Added from DeletedBOMComponents"])
 				BomHeader.where(id: bom_header_ids).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "AddedBOMs") if bom_header_ids.present?
 				BomComponent.where(id: bom_component_ids).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "AddedBOMComponents", odoo_type: "Add") if bom_component_ids.present?
 				BomComponent.where(id: del_bom_component_ids).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "Added from DeletedBOMComponents", odoo_type: "Add") if del_bom_component_ids.present?
@@ -118,7 +119,7 @@ class BomHeader < ApplicationRecord
 		end
 	end
 
-	def self.process_updated_boms(bom_headers)
+	def self.process_updated_boms(xml_file_id, bom_headers)
 		update_boms = []
 		create_boms = []
 		if bom_headers.present?
@@ -190,15 +191,17 @@ class BomHeader < ApplicationRecord
 				end
 			end
 			if create_boms.present?
-				add_result = @odoo_service.create_boms(create_boms)
+				add_result, error = @odoo_service.create_boms(create_boms)
 				added_bom_header_ids = added_bom_header_ids - error_comp_ids
+				added_bom_header_ids, added_component_ids, del_bom_component_ids = self.update_error_list(xml_file_id, [added_bom_header_ids, added_component_ids, []], add_result, ["Added by UpdateBOMs", "Added from UpdateBOMComponents", ""])
 				BomHeader.where(id: added_bom_header_ids.uniq).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "Added by UpdateBOMs", odoo_type: "Add") if add_result && added_bom_header_ids.present?
 				BomComponent.where(id: added_component_ids).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "Added from UpdateBOMComponents", odoo_type: "Add") if add_result && added_component_ids.present?
 			end
 
 			if update_boms.present?
-				update_result = @odoo_service.update_boms(update_boms)
+				update_result, error = @odoo_service.update_boms(update_boms)
 				bom_header_ids = bom_header_ids - error_comp_ids
+				bom_header_ids, bom_component_ids, del_bom_component_ids = self.update_error_list(xml_file_id, [bom_header_ids, bom_component_ids, []], update_result, ["UpdateBOMs", "UpdateBOMComponents", ""])
 				BomHeader.where(id: bom_header_ids.uniq).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "UpdateBOMs", odoo_type: "Update") if update_result && bom_header_ids.present?
 				BomComponent.where(id: bom_component_ids).update_all(status: AppConstants::FILE_STATUS[:success], processed_by: "UpdateBOMComponents", odoo_type: "Update") if update_result && bom_component_ids.present?
 			end
@@ -206,13 +209,53 @@ class BomHeader < ApplicationRecord
 		end
 	end
 
-	def self.process_deleted_boms(bom_headers)
+	def self.process_deleted_boms(xml_file_id, bom_headers)
 		if bom_headers.present?
 			bom_components = BomComponent.deleted.where(bom_header_id: bom_headers.pluck(:id)).where.not(odoo_part_number: nil)
-			result = @odoo_service.deleted_boms(bom_headers.pluck(:odoo_part_number).compact, bom_components.pluck(:odoo_part_number).compact)
-			bom_headers.update(status: AppConstants::FILE_STATUS[:success], odoo_type: "Delete") if result
-			bom_components.update(status: AppConstants::FILE_STATUS[:success], odoo_type: "Delete") if result
+			result, error = @odoo_service.deleted_boms(bom_headers.pluck(:odoo_part_number).compact, bom_components.pluck(:odoo_part_number).compact)
+			status, error_msg = AppConstants::FILE_STATUS[:success], {}
+			
+			if result.result.error_list.present?
+				headers = result.result.error_list.map { |e| e["header_list"] }.flatter.compact
+				headers.each_with_index do |header, i|
+					error_msg = result.result.logs[i]
+					error_headers = bom_headers.where(odoo_part_number: header)
+					error_headers.update_all(status: AppConstants::FILE_STATUS[:success], odoo_type: "Delete", error: {message: error_msg})
+					bom_components.where(bom_header_id: error_headers.pluck(:id)).update_all(status: AppConstants::FILE_STATUS[:success], odoo_type: "Delete", error: {message: error_msg})
+				end
+			else
+				bom_headers.update(status: AppConstants::FILE_STATUS[:success], odoo_type: "Delete")
+				bom_components.update(status: AppConstants::FILE_STATUS[:success], odoo_type: "Delete")
+			end
 			result
 		end
 	end
+
+
+	def self.update_error_list(xml_file_id, boms, response, processed_by)
+    bom_headers, bom_components, del_bom_components = boms
+    header_processed_by, component_processed_by, del_component_processed_by = processed_by
+    if response.result.error_list.present? && response.result.error_list["header_list"].present?
+    	headers = BomHeader.includes(:bom_components).where(xml_file_id: xml_file_id, odoo_part_number: response.result.error_list["header_list"])
+    	components = {}
+    	BomComponent.where(xml_file_id: xml_file_id, odoo_part_number: response.result.error_list["child_ids"]).map { |e| components[e.odoo_part_number] = e }
+    	headers.each do |header|
+    		bom_headers.delete(header.id)
+    		errors = []
+    		child_ids = components.keys & header.bom_component_ids
+    		child_ids.each do |child_id|
+    			child = components[child_id]
+    			if child.present?
+    				error_msg = response.result.error_list["logs"].find{|e| e.include?("#{child.odoo_part_number}:")}
+    				child.update(status: AppConstants::FILE_STATUS[:failed], error: {message: error_msg}, processed_by: child.is_deleted? ? del_component_processed_by : component_processed_by)
+    				errors << error_msg
+    				bom_components.delete(child_id)
+    				del_bom_components.delete(child_id)
+    			end
+    		end
+    		header.update(status: AppConstants::FILE_STATUS[:failed], error: {message: errors.join(", ")}, processed_by: header_processed_by)
+    	end
+    end
+    [bom_headers, bom_components, del_bom_components]
+  end
 end

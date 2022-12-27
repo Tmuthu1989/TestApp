@@ -8,6 +8,9 @@ class BomComponent < ApplicationRecord
   scope :deleted, -> { where(bom_component_type: "DeletedBOMComponents") }
   scope :deleted_inwork, -> { where(bom_component_type: "DeletedBOMs", part_state:"INWORK") }
   
+  def is_deleted?
+    bom_component_type == "DeletedBOMComponents"
+  end
 
 	def self.load_bom_components(xml_file)
 		json_obj = xml_file.json_obj

@@ -128,7 +128,7 @@ class OdooService
 		result = nil
 		error = {}
 		@request_type = "Create BOMs"
-		odoo_request(api_config.bom_create, body, setting.cookie)[0]
+		odoo_request(api_config.bom_create, body, setting.cookie)
 	end
 
 	def update_boms(components)
@@ -144,7 +144,7 @@ class OdooService
 		result = nil
 		error = {}
 		@request_type = "Update BOMs"
-		odoo_request(api_config.bom_update, body, setting.cookie)[0]
+		odoo_request(api_config.bom_update, body, setting.cookie)
 	end
 
 	def delete_bom_components(bom_ids, components)
@@ -179,7 +179,7 @@ class OdooService
 		result = nil
 		error = {}
 		@request_type = "Delete BOMs"
-		odoo_request(api_config.bom_delete, body, setting.cookie)[0]
+		odoo_request(api_config.bom_delete, body, setting.cookie)
 	end
 
 	def search_documents
