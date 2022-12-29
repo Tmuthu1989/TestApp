@@ -42,6 +42,7 @@ class UsersController < ApplicationController
 
   private
     def init_service!
+      authorize(User)
       @service = UsersService.new(request, params, current_user)
     end
 end

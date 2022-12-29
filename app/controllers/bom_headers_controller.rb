@@ -34,6 +34,7 @@ class BomHeadersController < ApplicationController
 
   private
     def init_service!
+      authorize(BomHeader)
       @service = BomHeadersService.new(request, params, current_user)
     end
 end

@@ -51,6 +51,9 @@
                           <td>
                             <%= render "common/status", status: document.status%><% if document.error.present?%><%= render "common/error", message: "#{document.error["message"]}"%><%end%>
                             <%if policy(Document).write? && document.pending?%>
+                              <%= link_to edit_xml_file_document_path(@xml_file, document), class: "btn btn-warning", remote: true do %>
+                                <i class="fa fa-edit"></i>
+                              <% end -%>
                               <%= link_to xml_file_document_re_process_path(@xml_file, document), class: "btn btn-success" do %>
                                 <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
                               <% end -%>

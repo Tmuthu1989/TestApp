@@ -10,7 +10,7 @@ class DocumentsController < ApplicationController
   end
 
   def edit
-    @xml_file, @document = @service.show
+    @xml_file, @document = @service.edit
   end
 
   def update
@@ -34,6 +34,7 @@ class DocumentsController < ApplicationController
 
   private
     def init_service!
+      authorize(Document)
       @service = DocumentsService.new(request, params, current_user)
     end
 end

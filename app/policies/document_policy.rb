@@ -34,6 +34,10 @@ class DocumentPolicy < ApplicationPolicy
     can_write?(role)
   end
 
+  def re_process?
+    can_write?(role)
+  end
+
   def role
     user&.role&.documents
   end

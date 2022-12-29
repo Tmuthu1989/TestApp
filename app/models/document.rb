@@ -18,6 +18,10 @@ class Document < ApplicationRecord
     status != AppConstants::FILE_STATUS[:success]
   end
 
+  def success?
+    status == AppConstants::FILE_STATUS[:success]
+  end
+
   def self.load_documents(xml_file)
     json_obj = xml_file.json_obj
     if json_obj
@@ -76,13 +80,14 @@ class Document < ApplicationRecord
       type: document.document_type
     }
     odoo_docs = []
+    odoo_docs << odoo_document
     if document.odoo_part_number.present? && document.document_url.present? && document.document_number.present? && document.document_type.present?
       @document_ids << document.id
       if @existing_documents[document.document_number].present? && @existing_documents[document.document_number] === odoo_document[:document_url]
         document.status = AppConstants::FILE_STATUS[:success]
+        odoo_docs.delete(odoo_document)
       else
         @odoo_documents << odoo_document 
-        odoo_docs << odoo_document
       end
       if @setting.documents_folder.present? && document.odoo_part_number.present?
         docs = Dir.glob("#{@setting.documents_folder}/#{document.part_number}*.*")
@@ -115,7 +120,7 @@ class Document < ApplicationRecord
     document.save
     if process_to_odoo && @odoo_documents.present?
       result, error = @odoo_service.create_documents(@odoo_documents)
-      document.update(status: AppConstants::FILE_STATUS[:success], odoo_type: "Add") if result.present? && @document_ids.present? && !error.present?
+      document.update(status: AppConstants::FILE_STATUS[:success], odoo_type: "Add", error: {}) if result.present? && @document_ids.present? && !error.present?
     end
     @odoo_documents
   end

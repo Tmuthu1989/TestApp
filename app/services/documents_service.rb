@@ -16,6 +16,7 @@ class DocumentsService < BaseService
 	end
 
 	def edit
+		get_data
 		[@xml_file, @document]
 	end
 
@@ -37,8 +38,17 @@ class DocumentsService < BaseService
 		@document.destroy
 	end
 
+	def get_data
+		if @document.deleted?
+			Document.process_delete_document(@xml_file, @document)
+		else
+			Document.process_create_document(@xml_file, @document)
+		end
+	end
+
 	def req_body
 		@setting = Setting.last
+		get_data
 		@body = {"access_token": @setting.access_token }
 		if document.document_type != "Delete"
 			@body["document_list"] = document.odoo_body["document_list"]
@@ -62,5 +72,9 @@ class DocumentsService < BaseService
 
 		def get_xml_file
 			XmlFile.find_by(id: params[:xml_file_id])
+		end
+
+		def document_params
+			params.require(:document).permit!
 		end
 end

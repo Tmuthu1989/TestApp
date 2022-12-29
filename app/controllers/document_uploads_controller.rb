@@ -34,6 +34,7 @@ class DocumentUploadsController < ApplicationController
 
   private
     def init_service!
+      authorize(DocumentUpload)
       @service = DocumentUploadsService.new(request, params, current_user)
     end
 end

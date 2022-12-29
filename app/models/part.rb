@@ -176,24 +176,27 @@ class Part < ApplicationRecord
         if error
           self.update(status: AppConstants::FILE_STATUS[:failed], processed_by: "Create products#{ 'by Update' if self.part_type != 'AddedParts'}", error: {server_error: error}, odoo_type: "Add") if response.present?
         else
-          part = Part.update_error_list(self.xml_file_id, [self.odoo_body], response, processed_by) if response.result.error_list.present?
-          self.update(status: AppConstants::FILE_STATUS[:success], processed_by: "Create products#{ 'by Update' if self.part_type != 'AddedParts'}", odoo_type: "Add", error: {}) if response.present? && part.present?
+          parts = [self.odoo_part_number]
+          parts = Part.update_error_list(self.xml_file_id, parts, response, processed_by) if response.result.error_list.present?
+          self.update(status: AppConstants::FILE_STATUS[:success], processed_by: "Create products#{ 'by Update' if self.part_type != 'AddedParts'}", odoo_type: "Add", error: {}) if response.present? && parts.present?
         end
       elsif ["ChangedParts", "UnchangedParts"].include?(self.part_type)
         response, error = @odoo_service.update_products(parts_to_be_updated)
         if error
           self.update(status: AppConstants::FILE_STATUS[:failed], processed_by: "Update Products", odoo_type: "Update", error: {server_error: error}) if response.present?
         else
-          part = Part.update_error_list(self.xml_file_id, [self.odoo_body], response, processed_by) if response.result.error_list.present?
-          self.update(status: AppConstants::FILE_STATUS[:success], processed_by: "Update Products", odoo_type: "Update", error: {}) if response.present? && part.present?
+          parts = [self.odoo_part_number]
+          parts = Part.update_error_list(self.xml_file_id, parts, response, processed_by) if response.result.error_list.present?
+          self.update(status: AppConstants::FILE_STATUS[:success], processed_by: "Update Products", odoo_type: "Update", error: {}) if response.present? && parts.present?
         end
       else
         response, error = @odoo_service.delete_products([self.odoo_part_number])
         if error
           self.update(status: AppConstants::FILE_STATUS[:failed], processed_by: "Delete Products", odoo_type: "Delete", error: {server_error: error}) if response.present?
         else
-          part = Part.update_error_list(self.xml_file_id, [self.odoo_body], response, processed_by) if response.result.error_list.present?
-          self.update(status: AppConstants::FILE_STATUS[:success], processed_by: "Delete Products", odoo_type: "Delete", error: {}) if response.present? && part.present?
+          parts = [self.odoo_part_number]
+          parts = Part.update_error_list(self.xml_file_id, parts, response, processed_by) if response.result.error_list.present?
+          self.update(status: AppConstants::FILE_STATUS[:success], processed_by: "Delete Products", odoo_type: "Delete", error: {}) if response.present? && parts.present?
         end
       end
     end

@@ -22,7 +22,7 @@ class UsersService < BaseService
 	end
 
 	def edit
-		
+		user
 	end
 
 	def update

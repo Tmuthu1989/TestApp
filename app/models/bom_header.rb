@@ -188,6 +188,7 @@ class BomHeader < ApplicationRecord
 					end
 					create_boms << added_bom if added_bom[:child_ids].present?
 					update_boms << update_bom if update_bom[:child_ids].present?
+					bom_header.update(status: AppConstants::FILE_STATUS[:success], processed_by: "UpdateBOMs", odoo_type: "Update") if !bom_components.present?
 				end
 			end
 			if create_boms.present?

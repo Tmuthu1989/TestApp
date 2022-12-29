@@ -1,0 +1,45 @@
+<%= form_for([@xml_file, @document]) do |f|%>
+  <div class="modal-header">
+    <h4 class="modal-title">Documents -
+      <%= "#{@document.number} - #{@document.document_number}"%>
+    </h4>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-6">
+        <div class="form-group">
+          <%= f.label :odoo_part_number, "Part No"%>
+          <%= f.text_field :odoo_part_number, required: true, class: "form-control"%>
+        </div>
+      </div>
+
+      <div class="col-6">
+        <div class="form-group">
+          <%= f.label :document_number%>
+          <%= f.text_field :document_number, required: true, class: "form-control"%>
+        </div>
+      </div>
+
+      <div class="col-6">
+        <div class="form-group">
+          <%= f.label :document_url%>
+          <%= f.url_field :document_url, required: true, class: "form-control"%>
+        </div>
+      </div>
+
+      <div class="col-6">
+        <div class="form-group">
+          <%= f.label :document_type%>
+          <%= f.text_field :document_type, required: true, class: "form-control"%>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <%= f.submit "Save", class: "btn btn-success"%>
+    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+  </div>
+<%end%>

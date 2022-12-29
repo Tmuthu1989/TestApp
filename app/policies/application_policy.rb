@@ -54,6 +54,10 @@ class ApplicationPolicy
     role === Role::READ_AND_WRITE
   end
 
+  def req_body?
+    true
+  end
+
   class Scope
     attr_reader :user, :scope
 

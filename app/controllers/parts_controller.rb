@@ -34,6 +34,7 @@ class PartsController < ApplicationController
 
   private
     def init_service!
+      authorize(Part)
       @service = PartsService.new(request, params, current_user)
     end
 end

@@ -42,6 +42,7 @@ class RolesController < ApplicationController
 
   private
     def init_service!
+      authorize(Role)
       @service = RolesService.new(request, params, current_user)
     end
 end
