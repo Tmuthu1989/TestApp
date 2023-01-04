@@ -36,7 +36,9 @@ class XmlFile < ApplicationRecord
 	    bom_components = xml_file.bom_components
 	    documents = xml_file.documents
 	    success_documents_count = documents.success.count
-			if parts.count === success_parts_count && documents.count === success_documents_count && bom_headers.count === bom_headers.success.count
+	    document_uploads = xml_file.document_uploads
+	    success_document_uploads_count = document_uploads.success.count
+			if parts.count === success_parts_count && documents.count === success_documents_count && bom_headers.count === bom_headers.success.count && document_uploads.count === success_document_uploads_count
 				xml_file.update(status: AppConstants::FILE_STATUS[:success]) 
 			else
 				xml_file.update(status: AppConstants::FILE_STATUS[:failed], file_error: "This file having some problem") 

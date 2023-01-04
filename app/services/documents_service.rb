@@ -16,7 +16,7 @@ class DocumentsService < BaseService
 	end
 
 	def edit
-		get_data
+		# get_data
 		[@xml_file, @document]
 	end
 
@@ -29,7 +29,7 @@ class DocumentsService < BaseService
 		if @document.deleted?
 			Document.process_delete_document(@xml_file, @document, process_to_odoo=true)
 		else
-			Document.process_create_document(@xml_file, @document, process_to_odoo=true)
+			Document.upload_to_server(@xml_file, [@document.id], @document.odoo_body["document_list"], @document)
 		end
 		@document
 	end
@@ -48,7 +48,7 @@ class DocumentsService < BaseService
 
 	def req_body
 		@setting = Setting.last
-		get_data
+		# get_data
 		@body = {"access_token": @setting.access_token }
 		if document.document_type != "Delete"
 			@body["document_list"] = document.odoo_body["document_list"]

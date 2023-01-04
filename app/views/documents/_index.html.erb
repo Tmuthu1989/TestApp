@@ -36,6 +36,7 @@
                       <th style="width: 10%;">Odoo Part Number</th>
                       <th style="width: 20%;">Document URL</th>
                       <th style="width: 15%;">Status</th>
+                      <th></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -50,6 +51,8 @@
                           <td><%= document.document_url%></td>
                           <td>
                             <%= render "common/status", status: document.status%><% if document.error.present?%><%= render "common/error", message: "#{document.error["message"]}"%><%end%>
+                          </td>
+                          <td>
                             <%if policy(Document).write? && document.pending?%>
                               <%= link_to edit_xml_file_document_path(@xml_file, document), class: "btn btn-warning", remote: true do %>
                                 <i class="fa fa-edit"></i>

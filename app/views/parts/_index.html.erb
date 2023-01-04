@@ -46,7 +46,7 @@
                           <td><%= part.part_number%></td>
                           <td><%= part.odoo_part_number%></td>
                           <td><%= part.odoo_body[setting.part_name_language]%></td>
-                          <td><%= render "common/status", status: part.status%><% if part.error.present?%><%= render "common/error", message: part.error["server_error"].present? ? part.error["server_error"] : "#{part.error.keys.join(", ")} are required"%><%end%><br><span class="badge badge-secondary"><%= part.processed_by%></span></td>
+                          <td><%= render "common/status", status: part.status%><% if part.error.present? && !part.success?%><%= render "common/error", message: part.error["server_error"].present? ? part.error["server_error"] : "#{part.error.keys.join(", ")} are required"%><%end%><br><span class="badge badge-secondary"><%= part.processed_by%></span></td>
                           <td>
 
                             <%= link_to [@xml_file, part], class: "btn btn-info", remote: true do %>

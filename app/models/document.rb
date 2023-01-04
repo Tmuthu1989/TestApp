@@ -26,13 +26,27 @@ class Document < ApplicationRecord
     json_obj = xml_file.json_obj
     if json_obj
       json_content = json_obj["COLLECTION"]
+      @parts = nil
+      @parts_number = nil
+      @setting = nil
+      @odoo_service = nil
+      @xml_file_names = nil
+      @document_names = nil
+      @parts_search = nil
+      @existing_documents = nil
+      init_config(xml_file)
       ["AddedDocuments", "ChangedDocuments", "UnchangedDocuments", "DeletedDocuments", "DeletedDocumentLinks"].each do |type|
         if json_content[type].present? && (json_content[type]["Document"].present? || json_content[type]["DocumentLink"].present?)
           documents = json_content[type]["Document"] || json_content[type]["DocumentLink"]
           if documents.present?
             documents = [documents] if documents.class.to_s != "Array"
             documents.each do |document|
-              xml_file.documents.create(number: document["Number"] || document["AssociatedObjectNumber"], document_number: document["DocumentNumber"], name: document["Name"] || document["AssociatedObjectNumber"], doc_type: type, json_obj: document, xml_content: document.to_xml(root: :Document))
+              doc = xml_file.documents.new(number: document["Number"] || document["AssociatedObjectNumber"], document_number: document["DocumentNumber"], name: document["Name"] || document["AssociatedObjectNumber"], doc_type: type, json_obj: document, xml_content: document.to_xml(root: :Document))
+              doc = get_document_type(doc)
+              doc = generate_part_number(doc)
+              doc, document_url, new_file_name, old_file_name = generate_url(doc, doc.number)
+              doc.save
+              doc = process_create_document(xml_file, doc) if !["DeletedDocuments", "DeletedDocumentLinks"].include?(type)
             end
           end
         end
@@ -45,14 +59,15 @@ class Document < ApplicationRecord
     @parts_number ||= xml_file.parts.pluck(:part_number, :odoo_part_number).to_h
     @setting ||= Setting.last
     @odoo_service ||= OdooService.new(@setting, xml_file.id)
-    @document_names ||= document ? [document.name] : xml_file.documents.pluck(:name).compact
+    @xml_file_names ||= xml_file.documents.pluck(:name).compact
+    @document_names ||= document ? [document.name] : @xml_file_names
     @parts_search ||= @document_names.present? ? @odoo_service.get_products(@document_names).map { |part| [part.part, part.default_code] }.to_h : {}
     @existing_documents ||= @odoo_service.search_documents.map { |doc| [doc.document_number, doc.document_url] }.to_h
   end
 
   def self.process_documents(xml_file)
     begin
-      init_config(xml_file)
+      # init_config(xml_file)
       process_create_documents(xml_file)
       process_delete_documents(xml_file)
     rescue StandardError => e
@@ -67,12 +82,7 @@ class Document < ApplicationRecord
   end
 
   def self.process_create_document(xml_file, document, process_to_odoo=false)
-    init_config(xml_file, (process_to_odoo ? document : nil))
-    @document_ids ||= []
-    @odoo_documents ||= []
-    document = get_document_type(document)
-    document = generate_part_number(document)
-    document, document_url, new_file_name, old_file_name = generate_url(document, document.number)
+    # init_config(xml_file, document)
     odoo_document = {
       part_no: document.odoo_part_number,
       document_number: document.document_number,
@@ -82,29 +92,30 @@ class Document < ApplicationRecord
     odoo_docs = []
     odoo_docs << odoo_document
     if document.odoo_part_number.present? && document.document_url.present? && document.document_number.present? && document.document_type.present?
-      @document_ids << document.id
       if @existing_documents[document.document_number].present? && @existing_documents[document.document_number] === odoo_document[:document_url]
         document.status = AppConstants::FILE_STATUS[:success]
         odoo_docs.delete(odoo_document)
-      else
-        @odoo_documents << odoo_document 
       end
       if @setting.documents_folder.present? && document.odoo_part_number.present?
         docs = Dir.glob("#{@setting.documents_folder}/#{document.part_number}*.*")
         docs += Dir.glob("#{@setting.documents_folder}/#{document.odoo_part_number}*.*")
         docs.each do |doc|
           ext = File.extname(doc)
+
           if ext === ".dxf"
             odoo_document[:type] = "2d"
-            odoo_document[:document_url] = odoo_document[:document_url].ext(".dxf")
+            get_doc_url(document, doc, true)
+            odoo_document[:document_url] = @url.ext(".dxf")
             unless @existing_documents[document.document_number].present? && @existing_documents[document.document_number] === odoo_document[:document_url]
-              @odoo_documents << odoo_document 
               odoo_docs << odoo_document
             end
           end
           new_file_name = doc.include?(document.odoo_part_number) ? doc : doc.gsub(document.part_number, document.odoo_part_number)
-          new_file_name = File.rename(doc, new_file_name) unless doc.include?(document.odoo_part_number)
+          File.rename(doc, new_file_name) unless doc.include?(document.odoo_part_number)
+          ext = File.extname(new_file_name)
           ProcessDocumentUploadJob.perform_later(document.id, new_file_name)
+          # upload_document(document.id, new_file_name)
+          # upload_document(document.id, new_file_name, true) if [".jpg", ".jpeg"].include?(ext.downcase)
         end
       end
     else
@@ -116,50 +127,66 @@ class Document < ApplicationRecord
       document.error = {message: "#{error.join(",")} are missing"}
 
     end
-    document.odoo_body = { document_list: odoo_docs } if odoo_docs
+    document.odoo_body = { document_list: odoo_docs }
     document.save
-    if process_to_odoo && @odoo_documents.present?
-      result, error = @odoo_service.create_documents(@odoo_documents)
-      document.update(status: AppConstants::FILE_STATUS[:success], odoo_type: "Add", error: {}) if result.present? && @document_ids.present? && !error.present?
+    document
+  end
+
+  def self.upload_to_server(xml_file, document_ids, odoo_documents, document=nil)
+    if odoo_documents.present?
+      init_config(xml_file, document) if document
+      result, error = @odoo_service.create_documents(odoo_documents)
+      document_ids = handle_error(xml_file, document_ids, result)
+      xml_file.documents.where(id: document_ids).update_all(status: AppConstants::FILE_STATUS[:success], odoo_type: "Add", error: {}) if result.present? && document_ids.present?
     end
-    @odoo_documents
+  end
+
+  def self.handle_error(xml_file, document_ids, response)
+    if response.result.present? && response.result.error_list.present?
+      response.result.error_list.each_with_index do |part_number, ind|
+        doc = xml_file.documents.pending.where.not(doc_type: ["DeletedDocuments", "DeletedDocumentLinks"]).find_by(odoo_part_number: part_number)
+        doc.update(status: AppConstants::FILE_STATUS[:failed], error: {message: response.result.logs[ind]}) if doc
+        document_ids.delete doc.id
+      end
+    end
+    document_ids
   end
 
   def self.process_create_documents(xml_file)
     @document_ids = []
     @odoo_documents = []
+    init_config(xml_file)
     xml_file.documents.pending.where.not(doc_type: ["DeletedDocuments", "DeletedDocumentLinks"]).each do |document|
-      process_create_document(xml_file, document)
+      @odoo_documents += document.odoo_body["document_list"] if document.odoo_body.present? && document.odoo_body["document_list"].present? && document.document_url.present?
+      @document_ids << document.id if document.odoo_body.present? && document.odoo_body["document_list"].present? && document.document_url.present?
     end
-    if @odoo_documents.present?
-      result, error = @odoo_service.create_documents(@odoo_documents)
-      xml_file.documents.where(id: @document_ids).update_all(status: AppConstants::FILE_STATUS[:success], odoo_type: "Add") if result.present? && @document_ids.present? && !error.present?
-    end
+    upload_to_server(xml_file, @document_ids, @odoo_documents) if @odoo_documents.present?
+      
   end
 
   def self.process_delete_document(xml_file, document, process_to_odoo=false)
-    init_config(xml_file, (process_to_odoo ? document : nil))
+    init_config(xml_file, document) if process_to_odoo
     @document_ids ||= []
     @odoo_documents ||= []
     document = generate_part_number(document, true)
     @odoo_documents << document.odoo_part_number if document.odoo_part_number.present?
     @document_ids << document.id if document.odoo_part_number.present?
     document.save
-    if process_to_odoo && odoo_documents.present?
+    if process_to_odoo && @odoo_documents.present?
       result = @odoo_service.delete_documents(@odoo_documents)
       document.update(status: AppConstants::FILE_STATUS[:success], odoo_type: "Delete") if result.present?
     end
   end
 
   def self.process_delete_documents(xml_file)
-    document_ids = []
-    odoo_documents = []
+    @document_ids = []
+    @odoo_documents = []
     xml_file.documents.pending.deleted.each do |document|
       process_delete_document(xml_file, document)
     end
-    if odoo_documents.present?
-      result = @odoo_service.delete_documents(odoo_documents)
-      xml_file.documents.where(id: document_ids).update_all(status: AppConstants::FILE_STATUS[:success], odoo_type: "Delete") if result.present? && document_ids.present?
+    if @odoo_documents.present?
+      result = @odoo_service.delete_documents(@odoo_documents)
+      xml_file.documents.where(id: document_ids).update_all(status: AppConstants::FILE_STATUS[:success], odoo_type: "Delete") if result.present? && @document_ids.present?
     end
   end
 
@@ -184,27 +211,31 @@ class Document < ApplicationRecord
     document
   end
 
-  def self.generate_url(document, old_file_name)
+  def self.get_doc_url(document, old_file_name, from_doc=false)
     url = nil
     if document.odoo_part_number.present? && old_file_name.present?
-      ext = File.extname(old_file_name)
-      old_file_name_without_ext = File.basename(old_file_name, ext)
-      new_file_name_without_ext = @setting.rename_document ? document.odoo_part_number : old_file_name_without_ext
-      new_file_name = "#{new_file_name_without_ext}#{ext}"
-      if [".ASM", ".PRT"].include?(ext)
-        url = "#{@setting.api_config["obs_url"]}#{new_file_name_without_ext}.stp"
-        new_extention = ".stp"
+      @ext = File.extname(old_file_name)
+      @old_file_name_without_ext = File.basename(old_file_name, @ext)
+      @new_file_name_without_ext = @setting.rename_document && !from_doc ? document.odoo_part_number : @old_file_name_without_ext
+      @new_file_name = "#{@new_file_name_without_ext}#{@ext}"
+      if [".ASM", ".PRT"].include?(@ext)
+        @url = "#{@setting.api_config["obs_url"]}#{@new_file_name_without_ext}.stp"
+        @new_extention = ".stp"
       else
-        new_extention = ".pdf"
-        url = "#{@setting.api_config["obs_url"]}#{new_file_name_without_ext}.pdf"
+        @new_extention = ".pdf"
+        @url = "#{@setting.api_config["obs_url"]}#{@new_file_name_without_ext}.pdf"
       end
     end
-    document.document_url ||= url
-    document.new_file_name ||= new_file_name_without_ext
-    document.original_file_name ||= old_file_name_without_ext
-    document.extention ||= ext
-    document.new_extention ||= new_extention
-    [document, url, new_file_name, old_file_name]
+  end
+
+  def self.generate_url(document, old_file_name)
+    get_doc_url(document, old_file_name)
+    document.document_url ||= @url
+    document.new_file_name ||= @new_file_name_without_ext
+    document.original_file_name ||= @old_file_name_without_ext
+    document.extention ||= @ext
+    document.new_extention ||= @new_extention
+    [document, @url, @new_file_name, old_file_name]
   end
 
   def self.get_document_type(document)
@@ -257,7 +288,7 @@ class Document < ApplicationRecord
         HttpRequest.create(error: error, xml_file_id: document.xml_file_id)
         document_status = status = AppConstants::FILE_STATUS[:failed]
       end
-      document.update(error: doc_error, status: document_status) unless is_odoo_upload
+      # document.update(error: doc_error, status: document_status) unless is_odoo_upload
       document_upload.update(file_name: file_name, document_number: document.document_number, number: document.number, part_number: document.name, odoo_part_number: document.odoo_part_number, status: status, error: error, xml_file_id: document.xml_file_id)
 
     end

@@ -236,7 +236,7 @@ class BomHeader < ApplicationRecord
 	def self.update_error_list(xml_file_id, boms, response, processed_by)
     bom_headers, bom_components, del_bom_components = boms
     header_processed_by, component_processed_by, del_component_processed_by = processed_by
-    if response.result.error_list.present? && response.result.error_list["header_list"].present?
+    if response.result.present? && response.result.error_list.present? && response.result.error_list["header_list"].present?
     	headers = BomHeader.includes(:bom_components).where(xml_file_id: xml_file_id, odoo_part_number: response.result.error_list["header_list"])
     	components = {}
     	BomComponent.where(xml_file_id: xml_file_id, odoo_part_number: response.result.error_list["child_ids"]).map { |e| components[e.odoo_part_number] = e }

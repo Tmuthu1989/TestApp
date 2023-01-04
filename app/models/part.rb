@@ -13,6 +13,10 @@ class Part < ApplicationRecord
     status != AppConstants::FILE_STATUS[:success]
   end
 
+  def success?
+    status == AppConstants::FILE_STATUS[:success]
+  end
+
   def self.load_parts(xml_file)
     json_obj = xml_file.json_obj
     if json_obj
