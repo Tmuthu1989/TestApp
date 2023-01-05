@@ -127,7 +127,7 @@ class Document < ApplicationRecord
       document.error = {message: "#{error.join(",")} are missing"}
 
     end
-    document.odoo_body = { document_list: odoo_docs }
+    document.odoo_body = { document_list: odoo_docs.uniq }
     document.save
     document
   end
