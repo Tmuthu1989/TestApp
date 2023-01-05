@@ -24,10 +24,10 @@
           </thead>
           <tbody>
             <%if @users.present?%>
-              <%i = params[:page].to_i * AppConstants::RECORDS_PER_PAGE%>
+              <%i = current_page * AppConstants::RECORDS_PER_PAGE%>
               <%@users.each do |user|%>
                 <tr>
-                  <td><%= i+1%></td>
+                  <td><%= i+=1%></td>
                   <td><%= user.full_name%></td>
                   <td><%= user.email%></td>
                   <td><%= user.role.name%></td>

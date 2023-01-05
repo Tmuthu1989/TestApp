@@ -7,7 +7,7 @@ class DocumentsService < BaseService
 	end
 
 	def index
-		documents = xml_file.documents.where.not(doc_type: ["DeletedDocumentLinks", "AddedDocumentLinks", "ChangedDocumentLinks", "UnchangedDocumentLinks"]).where(condition).page(params[:page]).per(params[:per_page]).order(status: :asc, created_at: :asc)
+		documents = Document.where.not(doc_type: ["DeletedDocumentLinks", "AddedDocumentLinks", "ChangedDocumentLinks", "UnchangedDocumentLinks"]).where(condition).page(params[:page]).per(params[:per_page]).order(status: :asc, created_at: :asc)
 		[@xml_file, documents]
 	end
 
@@ -63,11 +63,14 @@ class DocumentsService < BaseService
 	private
 
 		def condition
-			params[:type].present? ? { doc_type: params[:type] } : {}
+			cond = params[:type].present? ? { doc_type: params[:type] } : {}
+			cond.merge(xml_file_condition)
 		end
 
 		def get_document
-			Document.find_by(id: params[:id] || params[:document_id]) if params[:id] || params[:document_id]
+			doc = Document.find_by(id: params[:id] || params[:document_id]) if params[:id] || params[:document_id]
+			@xml_file ||= doc&.xml_file
+			doc
 		end
 
 		def get_xml_file

@@ -14,4 +14,8 @@ module ApplicationHelper
 	def is_active?(path)
 		"active" if request.path === path
 	end
+
+	def current_page
+		params[:page].to_i > 0 ? params[:page].to_i - 1 : 0
+	end
 end

@@ -11,7 +11,7 @@ class XmlFilesController < ApplicationController
 
   def read_xml_files
     @xml_files = @service.read_xml_files
-    redirect_to xml_files_path, notice: "Files Completed"
+    redirect_to xml_files_path
   end
 
   def destroy

@@ -1,7 +1,14 @@
 <%page_name "Settings"%>
-<div class="card card-info">
-	<div class="card-body">
-		<%= form_for(@setting, url: settings_path, method: :post) do |f|%>
+<%= form_for(@setting, url: settings_path, method: :post) do |f|%>
+	<div class="row mb-3">
+		<div class="col-12">
+			<div class="form-group">
+				<%= f.submit "Save", class: "btn btn-success float-right"%>
+			</div>
+		</div>
+	</div>
+	<div class="card card-info">
+		<div class="card-body">
 			<div class="row">
 				<div class="col-12 col-sm-6 col-md-4 col-lg-2">
 					<div class="form-group">
@@ -236,6 +243,6 @@
 					</div>
 				</div>
 			</div>
-		<%end%>
+		</div>
 	</div>
-</div>
+<%end%>

@@ -1,0 +1,21 @@
+<script>
+  // $( document ).on('ready', function() {
+    if($errors != undefined && $errors != null){
+      for(var key in $errors){
+        if ($errors.hasOwnProperty(key)) {
+          if ($errors[key].length > 0) {
+            toastr.error(key.capitalize() +" "+ $errors[key].join(", "))
+            // toastr.error($errors[key].join(", "))
+          }
+        }
+      }
+    }
+    <%flash.each do |msg_type, message|%>
+      <%msg_type = (msg_type == 'notice') ? "success" : msg_type%>
+      <%msg_type = (msg_type == 'alert') ? "error" : msg_type%>
+      setTimeout(function(){
+        toastr["<%=msg_type%>"]("<%=message%>")
+      }, 100)
+    <%end%>
+  // })
+</script>

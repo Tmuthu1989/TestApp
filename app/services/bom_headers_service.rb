@@ -8,7 +8,7 @@ class BomHeadersService < BaseService
 	end
 
 	def index
-		bom_headers = xml_file.bom_headers.where(condition).page(params[:page]).per(params[:per_page]).order(status: :asc, created_at: :asc)
+		bom_headers = BomHeader.where(condition).page(params[:page]).per(params[:per_page]).order(status: :asc, created_at: :asc)
 		[xml_file, bom_headers]
 	end
 
@@ -59,11 +59,14 @@ class BomHeadersService < BaseService
 	private
 
 		def condition
-			params[:type].present? ? { bom_type: params[:type] } : {}
+			cond = params[:type].present? ? { bom_type: params[:type] } : {}
+			cond.merge(xml_file_condition)
 		end
 
 		def get_bom_header
-			BomHeader.find_by(id: params[:id] || params[:bom_header_id]) if params[:id] || params[:bom_header_id]
+			header = BomHeader.find_by(id: params[:id] || params[:bom_header_id]) if params[:id] || params[:bom_header_id]
+			@xml_file ||= header&.xml_file
+			header
 		end
 
 		def bom_header_params

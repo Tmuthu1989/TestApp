@@ -30,7 +30,7 @@ class XmlFilesService < BaseService
 	end
 
 	def index
-		XmlFile.order(created_at: :desc)
+		XmlFile.page(params[:page]).per(params[:per_page]).order(created_at: :desc)
 	end
 
 	def show

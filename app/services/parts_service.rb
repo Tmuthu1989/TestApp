@@ -7,7 +7,7 @@ class PartsService < BaseService
 	end
 
 	def index
-		parts = xml_file.parts.where(condition).page(params[:page]).per(params[:per_page]).order(status: :asc, created_at: :asc)
+		parts = Part.where(condition).where(xml_file_condition).page(params[:page]).per(params[:per_page]).order(status: :asc, created_at: :asc)
 		[xml_file, parts]
 	end
 
@@ -53,7 +53,9 @@ class PartsService < BaseService
 		end
 
 		def get_part
-			Part.find_by(id: params[:id] || params[:part_id]) if params[:id] || params[:part_id]
+			part_rec = Part.find_by(id: params[:id] || params[:part_id]) if params[:id] || params[:part_id]
+			@xml_file ||= part_rec&.xml_file
+			part_rec
 		end
 
 		def part_params

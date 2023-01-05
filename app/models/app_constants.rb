@@ -1,5 +1,5 @@
 class AppConstants
-	RECORDS_PER_PAGE = 10
+	RECORDS_PER_PAGE = 25
 	FILE_STATUS = {
 		pending: "Pending",
 		processing: "Processing",

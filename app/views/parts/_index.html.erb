@@ -4,19 +4,19 @@
   <div class="col-12 mb-2">
     <ul class="nav nav-tabs" id="myTab" role="tablist">
       <li class="nav-item" role="presentation">
-        <a class="nav-link <%= 'active' if params[:type].blank?%>" id="xml_file_details-tab" href='<%= xml_file_parts_path(@xml_file)%>' data-toggles="tab" data-targets="#xml_file_details" type="button" role="tab" aria-controls="home" aria-selected="true">All Parts</a>
+        <a class="nav-link <%= 'active' if params[:type].blank?%>" id="xml_file_details-tab" href='<%= @xml_file ? xml_file_parts_path(@xml_file) : parts_path%>' data-toggles="tab" data-targets="#xml_file_details" type="button" role="tab" aria-controls="home" aria-selected="true">All Parts</a>
       </li>
       <li class="nav-item" role="presentation">
-        <a class="nav-link <%= 'active' if params[:type] === 'AddedParts'%>" id="parts-tab"  href='<%= xml_file_parts_by_type_path(@xml_file, "AddedParts")%>' data-toggles="tab" data-targets="#parts" type="button" role="tab" aria-controls="parts" aria-selected="false">Added Parts</a>
+        <a class="nav-link <%= 'active' if params[:type] === 'AddedParts'%>" id="parts-tab"  href='<%= @xml_file ? xml_file_parts_by_type_path(@xml_file, "AddedParts") : parts_by_type_path("AddedParts")%>' data-toggles="tab" data-targets="#parts" type="button" role="tab" aria-controls="parts" aria-selected="false">Added Parts</a>
       </li>
       <li class="nav-item" role="presentation">
-        <a class="nav-link <%= 'active' if params[:type] === 'ChangedParts'%>" id="parts-tab"  href='<%= xml_file_parts_by_type_path(@xml_file, "ChangedParts")%>' data-toggles="tab" data-targets="#parts" type="button" role="tab" aria-controls="parts" aria-selected="false">Changed Parts</a>
+        <a class="nav-link <%= 'active' if params[:type] === 'ChangedParts'%>" id="parts-tab"  href='<%= @xml_file ? xml_file_parts_by_type_path(@xml_file, "ChangedParts") : parts_by_type_path("ChangedParts")%>' data-toggles="tab" data-targets="#parts" type="button" role="tab" aria-controls="parts" aria-selected="false">Changed Parts</a>
       </li>
       <li class="nav-item" role="presentation">
-        <a class="nav-link <%= 'active' if params[:type] === 'UnchangedParts'%>" id="parts-tab"  href='<%= xml_file_parts_by_type_path(@xml_file, "UnchangedParts")%>' data-toggles="tab" data-targets="#parts" type="button" role="tab" aria-controls="parts" aria-selected="false">Unchanged Parts</a>
+        <a class="nav-link <%= 'active' if params[:type] === 'UnchangedParts'%>" id="parts-tab"  href='<%= @xml_file ? xml_file_parts_by_type_path(@xml_file, "UnchangedParts") : parts_by_type_path("UnchangedParts")%>' data-toggles="tab" data-targets="#parts" type="button" role="tab" aria-controls="parts" aria-selected="false">Unchanged Parts</a>
       </li>
       <li class="nav-item" role="presentation">
-        <a class="nav-link <%= 'active' if params[:type] === 'DeletedParts'%>" id="parts-tab"  href='<%= xml_file_parts_by_type_path(@xml_file, "DeletedParts")%>' data-toggles="tab" data-targets="#parts" type="button" role="tab" aria-controls="parts" aria-selected="false">Deleted Parts</a>
+        <a class="nav-link <%= 'active' if params[:type] === 'DeletedParts'%>" id="parts-tab"  href='<%= @xml_file ? xml_file_parts_by_type_path(@xml_file, "DeletedParts") : parts_by_type_path("DeletedParts")%>' data-toggles="tab" data-targets="#parts" type="button" role="tab" aria-controls="parts" aria-selected="false">Deleted Parts</a>
       </li>
     </ul>
     <div class="tab-content" id="myTabContent">
@@ -29,6 +29,7 @@
                 <table class="table table-bordered table-striped mb-3">
                   <thead>
                     <tr>
+                      <th style="width: 5%;">S.No</th>
                       <th style="width: 15%;">Part Type</th>
                       <th style="width: 15%;">Windhicll PartNumber</th>
                       <th style="width: 15%;">Odoo Part Number</th>
@@ -40,28 +41,46 @@
                   <tbody>
                     <%if @parts.present?%>
                       <%setting = Setting.last%>
+                      <%i = current_page * AppConstants::RECORDS_PER_PAGE%>
                       <%@parts.each do |part|%>
                         <tr>
+                          <td><%= i+= 1%></td>
                           <td><%= part.part_type%></td>
                           <td><%= part.part_number%></td>
                           <td><%= part.odoo_part_number%></td>
                           <td><%= part.odoo_body[setting.part_name_language]%></td>
                           <td><%= render "common/status", status: part.status%><% if part.error.present? && !part.success?%><%= render "common/error", message: part.error["server_error"].present? ? part.error["server_error"] : "#{part.error.keys.join(", ")} are required"%><%end%><br><span class="badge badge-secondary"><%= part.processed_by%></span></td>
                           <td>
-
-                            <%= link_to [@xml_file, part], class: "btn btn-info", remote: true do %>
-                              <i class="fa fa-eye"></i>
-                            <% end -%>
-                            <%if policy(Part).write? && part.pending?%>
-                              <%= link_to edit_xml_file_part_path(@xml_file, part), class: "btn btn-warning", remote: true do %>
-                                <i class="fa fa-edit"></i>
+                            <%if @xml_file%>
+                              <%= link_to [@xml_file, part], class: "btn btn-info", remote: true do %>
+                                <i class="fa fa-eye"></i>
                               <% end -%>
-                              <%= link_to xml_file_part_re_process_path(@xml_file, part), class: "btn btn-success" do %>
-                                <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                              <%if policy(Part).write? && part.pending?%>
+                                <%= link_to edit_xml_file_part_path(@xml_file, part), class: "btn btn-warning", remote: true do %>
+                                  <i class="fa fa-edit"></i>
+                                <% end -%>
+                                <%= link_to xml_file_part_re_process_path(@xml_file, part), class: "btn btn-success" do %>
+                                  <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                                <% end -%>
+                              <%end%>
+                              <%= link_to xml_file_part_req_body_path(@xml_file, part), class: "btn btn-secondary", remote: true do %>
+                                <i class="fas fa-code" aria-hidden="true"></i>
                               <% end -%>
-                            <%end%>
-                            <%= link_to xml_file_part_req_body_path(@xml_file, part), class: "btn btn-secondary", remote: true do %>
-                              <i class="fas fa-code" aria-hidden="true"></i>
+                            <%else%>
+                              <%= link_to part, class: "btn btn-info", remote: true do %>
+                                <i class="fa fa-eye"></i>
+                              <% end -%>
+                              <%if policy(Part).write? && part.pending?%>
+                                <%= link_to edit_part_path(part), class: "btn btn-warning", remote: true do %>
+                                  <i class="fa fa-edit"></i>
+                                <% end -%>
+                                <%= link_to part_re_process_path(part), class: "btn btn-success" do %>
+                                  <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                                <% end -%>
+                              <%end%>
+                              <%= link_to part_req_body_path(part), class: "btn btn-secondary", remote: true do %>
+                                <i class="fas fa-code" aria-hidden="true"></i>
+                              <% end -%>
                             <% end -%>
                           </td>
                         </tr>

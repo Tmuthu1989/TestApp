@@ -1,5 +1,4 @@
-<!-- <%page_name "Parts - #{@xml_file.file_name}"%> -->
-
+<%page_name "Parts #{@xml_file&.file_name}"%>
 <div class="card card-info m-0">
   <div class="card-body">
     <div class="row">
@@ -7,10 +6,10 @@
         <%= link_to xml_files_path, class: "btn btn-sm btn-info  mb-3 float-right" do %>
           <em class="fas fa-arrow-left"></em> Back
         <%end%>
-        <h3>Parts - <%=@xml_file.file_name%></h3>
+        <h3>Parts <%=@xml_file&.file_name%></h3>
       </div>
       <div class="col-12 mb-2">
-        <%= render "common/file_header"%>
+        <%if @xml_file%><%= render "common/file_header"%><% end -%>
         <div class="tab-content" id="myTabContent">
           <div class="tab-pane fade show active">
             <div class="row">

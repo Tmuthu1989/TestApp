@@ -160,7 +160,7 @@ class Document < ApplicationRecord
       @odoo_documents += document.odoo_body["document_list"] if document.odoo_body.present? && document.odoo_body["document_list"].present? && document.document_url.present?
       @document_ids << document.id if document.odoo_body.present? && document.odoo_body["document_list"].present? && document.document_url.present?
     end
-    upload_to_server(xml_file, @document_ids, @odoo_documents) if @odoo_documents.present?
+    upload_to_server(xml_file, @document_ids, @odoo_documents.uniq) if @odoo_documents.present?
       
   end
 

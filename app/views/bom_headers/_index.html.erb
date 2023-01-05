@@ -4,19 +4,19 @@
   <div class="col-12 mb-2">
     <ul class="nav nav-tabs" id="myTab" role="tablist">
       <li class="nav-item" role="presentation">
-        <a class="nav-link <%= 'active' if params[:type].blank?%>" id="xml_file_details-tab" href='<%= xml_file_bom_headers_path(@xml_file)%>' data-toggles="tab" data-targets="#xml_file_details" type="button" role="tab" aria-controls="home" aria-selected="true">All BOMs</a>
+        <a class="nav-link <%= 'active' if params[:type].blank?%>" id="xml_file_details-tab" href='<%= @xml_file ? xml_file_bom_headers_path(@xml_file) : bom_headers_path%>' data-toggles="tab" data-targets="#xml_file_details" type="button" role="tab" aria-controls="home" aria-selected="true">All BOMs</a>
       </li>
       <li class="nav-item" role="presentation">
-        <a class="nav-link <%= 'active' if params[:type] === 'AddedBOMs'%>" id="BOMHeaders-tab"  href='<%= xml_file_bom_headers_by_type_path(@xml_file, "AddedBOMs")%>' data-toggles="tab" data-targets="#BOMHeaders" type="button" role="tab" aria-controls="BOMHeaders" aria-selected="false">Added BOMs</a>
+        <a class="nav-link <%= 'active' if params[:type] === 'AddedBOMs'%>" id="BOMHeaders-tab"  href='<%= @xml_file ? xml_file_bom_headers_by_type_path(@xml_file, "AddedBOMs") : bom_headers_by_type_path("AddedBOMs")%>' data-toggles="tab" data-targets="#BOMHeaders" type="button" role="tab" aria-controls="BOMHeaders" aria-selected="false">Added BOMs</a>
       </li>
       <li class="nav-item" role="presentation">
-        <a class="nav-link <%= 'active' if params[:type] === 'ChangedBOMs'%>" id="BOMs-tab"  href='<%= xml_file_bom_headers_by_type_path(@xml_file, "ChangedBOMs")%>' data-toggles="tab" data-targets="#BOMHeaders" type="button" role="tab" aria-controls="BOMHeaders" aria-selected="false">Changed BOMs</a>
+        <a class="nav-link <%= 'active' if params[:type] === 'ChangedBOMs'%>" id="BOMs-tab"  href='<%= @xml_file ? xml_file_bom_headers_by_type_path(@xml_file, "ChangedBOMs") : bom_headers_by_type_path("ChangedBOMs")%>' data-toggles="tab" data-targets="#BOMHeaders" type="button" role="tab" aria-controls="BOMHeaders" aria-selected="false">Changed BOMs</a>
       </li>
       <li class="nav-item" role="presentation">
-        <a class="nav-link <%= 'active' if params[:type] === 'UnchangedBOMs'%>" id="BOMHeaders-tab"  href='<%= xml_file_bom_headers_by_type_path(@xml_file, "UnchangedBOMs")%>' data-toggles="tab" data-targets="#BOMHeaders" type="button" role="tab" aria-controls="BOMHeaders" aria-selected="false">Unchanged BOMs</a>
+        <a class="nav-link <%= 'active' if params[:type] === 'UnchangedBOMs'%>" id="BOMHeaders-tab"  href='<%= @xml_file ? xml_file_bom_headers_by_type_path(@xml_file, "UnchangedBOMs") : bom_headers_by_type_path("UnchangedBOMs")%>' data-toggles="tab" data-targets="#BOMHeaders" type="button" role="tab" aria-controls="BOMHeaders" aria-selected="false">Unchanged BOMs</a>
       </li>
       <li class="nav-item" role="presentation">
-        <a class="nav-link <%= 'active' if params[:type] === 'DeletedBOMs'%>" id="BOMHeaders-tab"  href='<%= xml_file_bom_headers_by_type_path(@xml_file, "DeletedBOMs")%>' data-toggles="tab" data-targets="#parts" type="button" role="tab" aria-controls="parts" aria-selected="false">Deleted Boms</a>
+        <a class="nav-link <%= 'active' if params[:type] === 'DeletedBOMs'%>" id="BOMHeaders-tab"  href='<%= @xml_file ? xml_file_bom_headers_by_type_path(@xml_file, "DeletedBOMs") : bom_headers_by_type_path("DeletedBOMs")%>' data-toggles="tab" data-targets="#parts" type="button" role="tab" aria-controls="parts" aria-selected="false">Deleted Boms</a>
       </li>
     </ul>
     <div class="tab-content" id="myTabContent">
@@ -29,6 +29,7 @@
                 <table class="table table-bordered table-striped mb-3">
                   <thead>
                     <tr>
+                      <th style="width: 5%;">S.No</th>
                       <th style="width: 15%;">BOM Type</th>
                       <th style="width: 15%;">BOM Number</th>
                       <th style="width: 15%;">Odoo BOM Number</th>
@@ -38,26 +39,45 @@
                   </thead>
                   <tbody>
                     <%if @bom_headers.present?%>
+                    <%i = current_page * AppConstants::RECORDS_PER_PAGE%>
                       <%@bom_headers.each do |bom_header|%>
                         <tr>
+                          <td><%= i+= 1%></td>
                           <td><%= bom_header.bom_type%></td>
                           <td><%= bom_header.number%></td>
                           <td><%= bom_header.odoo_part_number%></td>
                           <td><%= render "common/status", status: bom_header.status%><% if bom_header.error.present?%><%= render "common/error", message: "#{bom_header.error["message"]} components having error"%><%end%></td>
                           <td>
-                            <%= link_to [@xml_file, bom_header], class: "btn btn-info", remote: true do %>
-                              <i class="fa fa-eye"></i>
-                            <% end -%>
-                            <%if policy(BomHeader).write? && bom_header.pending?%>
-                              <%= link_to edit_xml_file_bom_header_path(@xml_file, bom_header), class: "btn btn-warning", remote: true do %>
-                                <i class="fa fa-edit"></i>
+                            <%if @xml_file%>
+                              <%= link_to [@xml_file, bom_header], class: "btn btn-info", remote: true do %>
+                                <i class="fa fa-eye"></i>
                               <% end -%>
-                              <%= link_to xml_file_bom_header_re_process_path(@xml_file, bom_header), class: "btn btn-success" do %>
-                                <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                              <%if policy(BomHeader).write? && bom_header.pending?%>
+                                <%= link_to edit_xml_file_bom_header_path(@xml_file, bom_header), class: "btn btn-warning", remote: true do %>
+                                  <i class="fa fa-edit"></i>
+                                <% end -%>
+                                <%= link_to xml_file_bom_header_re_process_path(@xml_file, bom_header), class: "btn btn-success" do %>
+                                  <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                                <% end -%>
+                              <%end%>
+                              <%= link_to xml_file_bom_header_req_body_path(@xml_file, bom_header), class: "btn btn-secondary", remote: true do %>
+                                <i class="fas fa-code" aria-hidden="true"></i>
                               <% end -%>
-                            <%end%>
-                            <%= link_to xml_file_bom_header_req_body_path(@xml_file, bom_header), class: "btn btn-secondary", remote: true do %>
-                              <i class="fas fa-code" aria-hidden="true"></i>
+                            <%else%>
+                              <%= link_to bom_header, class: "btn btn-info", remote: true do %>
+                                <i class="fa fa-eye"></i>
+                              <% end -%>
+                              <%if policy(BomHeader).write? && bom_header.pending?%>
+                                <%= link_to edit_bom_header_path(bom_header), class: "btn btn-warning", remote: true do %>
+                                  <i class="fa fa-edit"></i>
+                                <% end -%>
+                                <%= link_to bom_header_re_process_path(bom_header), class: "btn btn-success" do %>
+                                  <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                                <% end -%>
+                              <%end%>
+                              <%= link_to bom_header_req_body_path(bom_header), class: "btn btn-secondary", remote: true do %>
+                                <i class="fas fa-code" aria-hidden="true"></i>
+                              <% end -%>
                             <% end -%>
                           </td>
                         </tr>

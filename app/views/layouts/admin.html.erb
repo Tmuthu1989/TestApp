@@ -9,6 +9,7 @@
    <link rel="icon" type="image/x-icon" href="/favicon.ico">
    <title><%= yield(:page_name)%></title><!-- =============== VENDOR STYLES ===============-->
    <!-- FONT AWESOME-->
+   <script>$errors = null</script>
    <link rel="stylesheet" href="/templates/admin/vendor/@fortawesome/fontawesome-free/css/brands.css">
    <link rel="stylesheet" href="/templates/admin/vendor/@fortawesome/fontawesome-free/css/regular.css">
    <link rel="stylesheet" href="/templates/admin/vendor/@fortawesome/fontawesome-free/css/solid.css">
@@ -35,33 +36,26 @@
               <div><%= yield(:page_name) %></div>
            </div>
            <div class="row">
-               <div class="col-12">
-                  <%if notice.present? || alert.present?%>
-                     <div class="alert alert-<%= notice ? 'success' : 'danger'%> alert-dismissible fade show" role="alert">
-                       <%= notice || alert%>
-                       <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                         <span aria-hidden="true">&times;</span>
-                       </button>
-                     </div>
-                  <%end%>                 
-               </div>
+               
                <div class="col-lg-12">
                   <%= yield%>
                </div>
            </div>
         </div>
       </section><!-- Page footer-->
-      <footer class="footer-container"><span>&copy; <%= Date.today.year%> - Load XML</span></footer>
+      <footer class="footer-container"><span>All rights reserved &copy; <%= Date.today.year%> - Jungo</span></footer>
+      <%= render partial: "common/flash_messages"%>
    </div><!-- =============== VENDOR SCRIPTS ===============-->
    <!-- MODERNIZR-->
    <script src="/templates/admin/vendor/modernizr/modernizr.custom.js"></script><!-- STORAGE API-->
    <script src="/templates/admin/vendor/js-storage/js.storage.js"></script><!-- SCREENFULL-->
    <script src="/templates/admin/vendor/screenfull/dist/screenfull.js"></script><!-- i18next-->
    <!-- =============== APP SCRIPTS ===============-->
-   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+   <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js" integrity="sha512-lbwH47l/tPXJYG9AcFNoJaTMhGvYWhVM9YI43CT+uteTRRaiLCui8snIgyAN8XWgNjNhCqlAUdzZptso6OCoFQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.css" integrity="sha512-oe8OpYjBaDWPt2VmSFR+qYOdnTjeV9QPLJUeqZyprDEQvQLJ9C5PCFclxwNuvb/GQgQngdCXzKSFltuHD3eCxA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
    <script src="/templates/admin/js/app.js"></script>
    <%= javascript_importmap_tags %>
    <%= render "common/modal"%>

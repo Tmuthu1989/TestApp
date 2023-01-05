@@ -13,6 +13,7 @@
           <table class="table table-bordered">
             <thead>
               <tr>
+                <th>S.No</th>
                 <th>File Name</th>
                 <th>File Path</th>
                 <th>Status</th>
@@ -21,6 +22,7 @@
             </thead>
             <tbody>
               <%if @xml_files.present?%>
+                <%@i = current_page * AppConstants::RECORDS_PER_PAGE%>
                 <% @xml_files.each do |xml_file| %>
                   <%= render xml_file %>
                 <% end %>
@@ -29,6 +31,7 @@
               <%end%>
             </tbody>
           </table>
+          <%= paginate @xml_files, theme: 'twitter-bootstrap-4', :pagination_class => "pagination justify-content-center" %>
         </div>
       </div>
     </div>

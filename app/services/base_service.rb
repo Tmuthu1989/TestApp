@@ -7,6 +7,10 @@ class BaseService
     self.setting = Setting.last || Setting.create(app_name: "Read XML")
   end
 
+  def xml_file_condition
+    xml_file.present? ? {xml_file_id: xml_file.id} : {}
+  end
+
   def settings
     if request.post?
       setting.update(setting_params)

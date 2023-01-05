@@ -5,8 +5,10 @@
     <div class="card flex-row align-items-center align-items-stretch border-0">
       <div class="col-4 d-flex align-items-center bg-primary-dark justify-content-center rounded-left"><em class="fas fa-file-code fa-3x"></em></div>
       <div class="col-8 py-3 bg-primary rounded-right">
-        <div class="h2 mt-0"><%= "#{XmlFile.success.count}/#{XmlFile.count}"%></div>
-        <div class="text-uppercase">XML Files</div>
+        <a href="<%= xml_files_path%>">
+          <div class="h2 mt-0 text-white"><%= "#{XmlFile.success.count}/#{XmlFile.count}"%></div>
+          <div class="text-uppercase  text-white">XML Files</div>
+        </a>
       </div>
     </div>
   </div>
@@ -15,8 +17,10 @@
     <div class="card flex-row align-items-center align-items-stretch border-0">
       <div class="col-4 d-flex align-items-center bg-purple-dark justify-content-center rounded-left"><em class="icon-settings fa-3x"></em></div>
       <div class="col-8 py-3 bg-purple rounded-right">
-        <div class="h2 mt-0"><%= "#{Part.success.count}/#{Part.count}"%></div>
-        <div class="text-uppercase">Parts</div>
+        <a href="<%= parts_path%>">
+          <div class="h2 mt-0 text-white"><%= "#{Part.success.count}/#{Part.count}"%></div>
+          <div class="text-uppercase text-white">Parts</div>
+        </a>
       </div>
     </div>
   </div>
@@ -25,8 +29,10 @@
     <div class="card flex-row align-items-center align-items-stretch border-0">
       <div class="col-4 d-flex align-items-center bg-green-dark justify-content-center rounded-left"><em class="icon-bubbles fa-3x"></em></div>
       <div class="col-8 py-3 bg-green rounded-right">
-        <div class="h2 mt-0"><%= "#{BomHeader.success.count}/#{BomHeader.count}"%></div>
-        <div class="text-uppercase">BOMs</div>
+        <a href="<%= bom_headers_path%>">
+          <div class="h2 mt-0 text-white"><%= "#{BomHeader.success.count}/#{BomHeader.count}"%></div>
+          <div class="text-uppercase text-white">BOMs</div>
+        </a>
       </div>
     </div>
   </div>
@@ -35,8 +41,10 @@
     <div class="card flex-row align-items-center align-items-stretch border-0">
       <div class="col-4 d-flex align-items-center bg-warning-dark justify-content-center rounded-left"><em class="fas fa-file fa-3x"></em></div>
       <div class="col-8 py-3 bg-warning rounded-right">
-        <div class="h2 mt-0"><%= "#{Document.success.count}/#{Document.count}"%></div>
-        <div class="text-uppercase">Documents</div>
+        <a href="<%= documents_path%>">
+          <div class="h2 mt-0 text-white"><%= "#{Document.success.count}/#{Document.count}"%></div>
+          <div class="text-uppercase text-white">Documents</div>
+        </a>
       </div>
     </div>
   </div>
@@ -45,8 +53,10 @@
     <div class="card flex-row align-items-center align-items-stretch border-0">
       <div class="col-4 d-flex align-items-center bg-info-dark justify-content-center rounded-left"><em class="icon-cloud-upload fa-3x"></em></div>
       <div class="col-8 py-3 bg-info rounded-right">
-        <div class="h2 mt-0"><%= "#{DocumentUpload.success.count}/#{DocumentUpload.count}"%></div>
-        <div class="text-uppercase">Document Uploads</div>
+        
+          <div class="h2 mt-0 text-white"><%= "#{DocumentUpload.success.count}/#{DocumentUpload.count}"%></div>
+          <div class="text-uppercase text-white">Document Uploads</div>
+        
       </div>
     </div>
   </div>
@@ -55,9 +65,16 @@
     <div class="card flex-row align-items-center align-items-stretch border-0">
       <div class="col-4 d-flex align-items-center bg-info-dark justify-content-center rounded-left"><em class="icon-cloud-upload fa-3x"></em></div>
       <div class="col-8 py-3 bg-info rounded-right">
-        <div class="h2 mt-0"><%= User.count%></div>
-        <div class="text-uppercase">Users</div>
+        
+          <div class="h2 mt-0 text-white"><%= User.count%></div>
+          <div class="text-uppercase text-white">Users</div>
+        
       </div>
     </div>
   </div>
 </div>
+<style>
+  a {
+    text-decoration: none !important;
+  }
+</style>
